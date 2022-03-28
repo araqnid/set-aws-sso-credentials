@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-sso": "^3.56.0",
+    "@aws-sdk/shared-ini-file-loader": "^3.56.0",
     "chalk": "^4.1.2",
     "readlines": "^0.2.0"
   },
