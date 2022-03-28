@@ -40,19 +40,23 @@ async function main(profile: string) {
 
   const ssoConfig = await loadProfileSSOConfig(profile)
   const ssoClient = new SSOClient({region})
-  const response = await ssoClient.send(new GetRoleCredentialsCommand({
-    accountId: ssoConfig.sso_account_id,
-    roleName: ssoConfig.sso_role_name,
-    accessToken
-  }))
+  try {
+    const response = await ssoClient.send(new GetRoleCredentialsCommand({
+      accountId: ssoConfig.sso_account_id,
+      roleName: ssoConfig.sso_role_name,
+      accessToken
+    }))
 
-  if (response.roleCredentials) {
-    const {accessKeyId, secretAccessKey, sessionToken} = response.roleCredentials
-    console.log(`AWS_ACCESS_KEY_ID=${accessKeyId};`)
-    console.log(`AWS_SECRET_ACCESS_KEY=${secretAccessKey};`)
-    console.log(`AWS_SESSION_TOKEN=${sessionToken};`)
-    console.log(`AWS_DEFAULT_REGION=${region};`)
-    console.log(`export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;`)
+    if (response.roleCredentials) {
+      const {accessKeyId, secretAccessKey, sessionToken} = response.roleCredentials
+      console.log(`AWS_ACCESS_KEY_ID=${accessKeyId};`)
+      console.log(`AWS_SECRET_ACCESS_KEY=${secretAccessKey};`)
+      console.log(`AWS_SESSION_TOKEN=${sessionToken};`)
+      console.log(`AWS_DEFAULT_REGION=${region};`)
+      console.log(`export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;`)
+    }
+  } finally {
+    ssoClient.destroy()
   }
 }
 
