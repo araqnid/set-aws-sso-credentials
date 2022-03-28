@@ -1,6 +1,6 @@
 import fs from "fs"
 import {readlines} from "readlines"
-import {SSO} from "@aws-sdk/client-sso";
+import {GetRoleCredentialsCommand, SSOClient} from "@aws-sdk/client-sso";
 
 if (process.argv.length < 3) {
   console.error("Specify profile name as parameter")
@@ -39,12 +39,12 @@ async function main(profile: string) {
   const {accessToken, region} = JSON.parse(await fs.promises.readFile(credentialsCacheFile, "utf-8"))
 
   const ssoConfig = await loadProfileSSOConfig(profile)
-  const sso = new SSO({region})
-  const response = await sso.getRoleCredentials({
+  const ssoClient = new SSOClient({region})
+  const response = await ssoClient.send(new GetRoleCredentialsCommand({
     accountId: ssoConfig.sso_account_id,
     roleName: ssoConfig.sso_role_name,
     accessToken
-  })
+  }))
 
   if (response.roleCredentials) {
     const {accessKeyId, secretAccessKey, sessionToken} = response.roleCredentials
