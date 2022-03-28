@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.957.0",
+    "@aws-sdk/client-sso": "^3.56.0",
     "chalk": "^4.1.2",
     "readlines": "^0.2.0"
   },
