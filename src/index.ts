@@ -3,13 +3,13 @@ import {GetRoleCredentialsCommand, SSOClient} from "@aws-sdk/client-sso";
 import {loadSharedConfigFiles} from "@aws-sdk/shared-ini-file-loader";
 
 async function main(profile?: string) {
-  const credentialsCacheFile = `${process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json`
-  const {accessToken, region} = JSON.parse(await fs.promises.readFile(credentialsCacheFile, "utf-8"))
-
   const sharedConfig = await loadSharedConfigFiles()
   if (profile) {
+    const credentialsCacheFile = `${process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json`
+    const {accessToken} = JSON.parse(await fs.promises.readFile(credentialsCacheFile, "utf-8"))
+
     const ssoConfig = sharedConfig.configFile[profile]
-    const ssoClient = new SSOClient({region})
+    const ssoClient = new SSOClient({region: ssoConfig.sso_region})
     try {
       const response = await ssoClient.send(new GetRoleCredentialsCommand({
         accountId: ssoConfig.sso_account_id,
@@ -22,7 +22,7 @@ async function main(profile?: string) {
         process.stdout.write(`AWS_ACCESS_KEY_ID=${accessKeyId};\n`)
         process.stdout.write(`AWS_SECRET_ACCESS_KEY=${secretAccessKey};\n`)
         process.stdout.write(`AWS_SESSION_TOKEN=${sessionToken};\n`)
-        process.stdout.write(`AWS_DEFAULT_REGION=${region};\n`)
+        process.stdout.write(`AWS_DEFAULT_REGION=${ssoConfig.sso_region};\n`)
         process.stdout.write(`export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;\n`)
       }
     } finally {
