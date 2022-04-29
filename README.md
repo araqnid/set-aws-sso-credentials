@@ -41,7 +41,7 @@ The `init_aliases.sh` script is intended to be run from `.zshrc` or `.bashrc` an
 profiles. It should be sourced with the path to the built tool as an argument:
 
 ```sh
-. $HOME/src/set-aws-sso-credentials/init_aliases.sh $HOME/src/set-aws-sso-credentials/dist
+. "$HOME/src/set-aws-sso-credentials/init_aliases.sh" "$HOME/src/set-aws-sso-credentials/dist"
 ```
 
 This will provide a `aws_sso_profile` command that can take a profile name as an argument, and will automatically
