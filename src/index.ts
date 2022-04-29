@@ -67,6 +67,7 @@ async function main(profile?: string) {
   const sharedConfig = await loadSharedConfigFiles()
   if (profile) {
     const ssoConfig = sharedConfig.configFile[profile]
+    if (!ssoConfig) throw new Error(`No such profile in $HOME/.aws/config: ${profile}`)
     const ssoClient = new SSOClient({region: ssoConfig.sso_region})
     try {
       const response = await getRoleCredentialsPossiblyLogin(ssoClient, ssoConfig, profile)
