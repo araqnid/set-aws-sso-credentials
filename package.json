@@ -10,7 +10,7 @@
   "dependencies": {
     "@aws-sdk/client-sso": "^3.80.0",
     "@aws-sdk/shared-ini-file-loader": "^3.80.0",
-    "chalk": "^4.1.2",
+    "chalk": "^5.0.1",
     "readlines": "^0.2.0"
   },
   "devDependencies": {
