@@ -19,14 +19,14 @@ async function attemptSSOLogin(profileName: string) {
     command.stdout.setEncoding("utf-8")
     command.stdout.on("data", data => {
       for (const line of data.split('\n')) {
-        console.log(`aws sso login: ${line}`)
+        process.stderr.write(`aws sso login: ${line}\n`)
       }
     })
 
     command.stderr.setEncoding("utf-8")
     command.stderr.on("data", data => {
       for (const line of data.split('\n')) {
-        console.log(`aws sso login:(stderr): ${line}`)
+        process.stderr.write(`aws sso login:(stderr): ${line}\n`)
       }
     })
 
