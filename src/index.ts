@@ -3,6 +3,7 @@ import {GetRoleCredentialsCommand, GetRoleCredentialsCommandOutput, SSOClient} f
 import {loadSharedConfigFiles} from "@aws-sdk/shared-ini-file-loader";
 import {Profile} from "@aws-sdk/types";
 import {spawn} from "child_process";
+import readline from "readline";
 
 async function loadAccessToken(): Promise<string> {
   const credentialsCacheFile = `${process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json`
@@ -16,18 +17,18 @@ async function attemptSSOLogin(profileName: string) {
       stdio: ["inherit", "pipe", "pipe"]
     })
 
-    command.stdout.setEncoding("utf-8")
-    command.stdout.on("data", data => {
-      for (const line of data.split('\n')) {
-        process.stderr.write(`aws sso login: ${line}\n`)
-      }
+    readline.createInterface({
+      input: command.stdout,
+      crlfDelay: Infinity
+    }).on("line", line => {
+      process.stderr.write(`aws sso login: ${line}\n`)
     })
 
-    command.stderr.setEncoding("utf-8")
-    command.stderr.on("data", data => {
-      for (const line of data.split('\n')) {
-        process.stderr.write(`aws sso login:(stderr): ${line}\n`)
-      }
+    readline.createInterface({
+      input: command.stderr,
+      crlfDelay: Infinity
+    }).on("line", line => {
+      process.stderr.write(`aws sso login:(stderr): ${line}\n`)
     })
 
     command.on("error", err => {
