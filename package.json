@@ -15,8 +15,8 @@
   "devDependencies": {
     "@swc/core": "^1.2.179",
     "@types/node": "^16.11.33",
-    "@vercel/ncc": "^0.33.4",
+    "@vercel/ncc": "^0.34.0",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.4"
+    "typescript": "^4.7.2"
   }
 }
