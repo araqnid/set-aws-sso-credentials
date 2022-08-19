@@ -62,7 +62,10 @@ private fun Stream.Readable.readTextChunks(encoding: String = "utf-8"): ReceiveC
         decodeStrings = false
         write = write@{ chunk, encoding, callback ->
             val fastResult = chunks.trySend(chunk.unsafeCast<String>())
-            if (fastResult.isSuccess) return@write
+            if (fastResult.isSuccess) {
+                callback(null)
+                return@write
+            }
             val block: suspend () -> Unit = {
                 chunks.send(chunk.unsafeCast<String>())
             }
