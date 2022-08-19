@@ -1,6 +1,5 @@
 /dist
 /.idea
 /yarn-error.log
-/gradle
 /build
 .gradle
