@@ -60,7 +60,7 @@ private fun Stream.Readable.readTextChunks(encoding: String = "utf-8"): ReceiveC
     setEncoding(encoding)
     pipe(Stream.Writable(jsObject {
         decodeStrings = false
-        write = write@{ chunk, encoding, callback ->
+        write = write@{ chunk, _, callback ->
             val fastResult = chunks.trySend(chunk.unsafeCast<String>())
             if (fastResult.isSuccess) {
                 callback(null)
