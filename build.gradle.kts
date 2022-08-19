@@ -26,7 +26,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
     implementation(npm("@aws-sdk/client-sso", "^3.145.0"))
     implementation(npm("@aws-sdk/shared-ini-file-loader", "^3.127.0"))
-    implementation(npm("readlines", "^0.2.0"))
 
     testImplementation(kotlin("test-js"))
     testImplementation("org.araqnid.kotlin.assert-that:assert-that:0.1.1")
