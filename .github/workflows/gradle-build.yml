@@ -15,3 +15,8 @@ jobs:
         uses: gradle/gradle-command-action@v2
         with:
           arguments: build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: build/set-aws-sso-credentials-kotlin-nodejs.zip
