@@ -13,15 +13,22 @@ private data class CredentialsCacheFile(val accessToken: String)
 
 private val json = Json { ignoreUnknownKeys = true }
 
-private suspend fun loadAccessToken(): String {
-    val credentialsCacheFile = "${Process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json"
-    val fileJson = json.decodeFromString<CredentialsCacheFile>(
-        readFile(
-            credentialsCacheFile,
-            "utf-8"
+private suspend fun loadAccessToken(): String? {
+    try {
+        val credentialsCacheFile = "${Process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json"
+        val fileJson = json.decodeFromString<CredentialsCacheFile>(
+            readFile(
+                credentialsCacheFile,
+                "utf-8"
+            )
         )
-    )
-    return fileJson.accessToken
+        return fileJson.accessToken
+    } catch (err: Throwable) {
+        if (err.asDynamic().code == "ENOENT") {
+            return null
+        }
+        throw err
+    }
 }
 
 private suspend fun attemptSSOLogin(profileName: String) {
@@ -46,20 +53,31 @@ private suspend fun getRoleCredentialsPossiblyLogin(
     roleName: String,
     profileName: String
 ): GetRoleCredentialsCommandOutput {
-    try {
-        return ssoClient.getRoleCredentials(
-            accountId = accountId,
-            roleName = roleName,
-            accessToken = loadAccessToken()
-        )
-    } catch (err: UnauthorizedException) {
-        attemptSSOLogin(profileName)
-        return ssoClient.getRoleCredentials(
-            accountId = accountId,
-            roleName = roleName,
-            accessToken = loadAccessToken()
-        )
+    val accessToken = loadAccessToken()
+    if (accessToken != null) {
+        return try {
+            ssoClient.getRoleCredentials(
+                accountId = accountId,
+                roleName = roleName,
+                accessToken = accessToken
+            )
+        } catch (err: UnauthorizedException) {
+            attemptSSOLogin(profileName)
+            val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
+            ssoClient.getRoleCredentials(
+                accountId = accountId,
+                roleName = roleName,
+                accessToken = newAccessToken
+            )
+        }
     }
+    attemptSSOLogin(profileName)
+    val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
+    return ssoClient.getRoleCredentials(
+        accountId = accountId,
+        roleName = roleName,
+        accessToken = newAccessToken
+    )
 }
 
 fun main() = runScript {
