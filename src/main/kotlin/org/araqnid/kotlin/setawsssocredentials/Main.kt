@@ -93,7 +93,7 @@ fun main() = runScript {
             val response = getRoleCredentialsPossiblyLogin(ssoClient, accountId, roleName, profile)
 
             response.roleCredentials?.let { roleCredentials ->
-                println("AWS_ACCESS_KEY=${roleCredentials.accessKeyId};")
+                println("AWS_ACCESS_KEY_ID=${roleCredentials.accessKeyId};")
                 println("AWS_SECRET_ACCESS_KEY=${roleCredentials.secretAccessKey};")
                 println("AWS_SESSION_TOKEN=${roleCredentials.sessionToken};")
                 println("AWS_DEFAULT_REGION=${ssoConfig["sso_region"]};")
