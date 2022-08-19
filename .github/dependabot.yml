@@ -1,21 +1,24 @@
 version: 2
 
 updates:
-  - package-ecosystem: npm
-    directory: /
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: weekly
       day: saturday
       time: "07:00"
       timezone: Europe/London
-    ignore:
-      - dependency-name: 'node'
-        update-types: [ 'version-update:semver-major' ]
-      - dependency-name: '@types/node'
-        update-types: [ 'version-update:semver-major' ]
 
-  - package-ecosystem: github-actions
+  - package-ecosystem: "gradle"
     directory: "/"
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "07:00"
+      timezone: Europe/London
+
+  - package-ecosystem: "npm"
+    directory: "/kotlin-js-store"
     schedule:
       interval: weekly
       day: saturday
