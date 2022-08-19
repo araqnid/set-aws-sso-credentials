@@ -18,5 +18,5 @@ external interface GetRoleCredentialsCommandOutput : SSOServiceOutput, GetRoleCr
  */
 external class GetRoleCredentialsCommand(input: GetRoleCredentialsCommandInput) :
     Command<GetRoleCredentialsCommandInput, GetRoleCredentialsCommandOutput> {
-    val input: GetRoleCredentialsCommandInput
+    override val input: GetRoleCredentialsCommandInput
 }

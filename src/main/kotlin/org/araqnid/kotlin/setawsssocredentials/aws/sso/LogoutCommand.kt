@@ -28,5 +28,5 @@ external interface LogoutCommandOutput : SSOServiceOutput, MetadataBearer
  * @see SSOClientResolvedConfig
  */
 external class LogoutCommand(input: LogoutCommandInput) : Command<LogoutCommandInput, LogoutCommandOutput> {
-    val input: LogoutCommandInput
+    override val input: LogoutCommandInput
 }

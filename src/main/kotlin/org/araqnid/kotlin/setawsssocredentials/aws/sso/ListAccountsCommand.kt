@@ -20,5 +20,5 @@ external interface ListAccountsCommandOutput : SSOServiceOutput, ListAccountsRes
  */
 external class ListAccountsCommand(input: ListAccountsCommandInput) :
     Command<ListAccountsCommandInput, ListAccountsCommandOutput> {
-    val input: ListAccountsCommandInput
+    override val input: ListAccountsCommandInput
 }
