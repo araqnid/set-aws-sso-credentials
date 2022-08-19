@@ -52,7 +52,7 @@ val installNccTask = tasks.register<NpmTask>("installNCC") {
 
     doFirst {
         delete(toolDir)
-        toolDir.mkdirs()
+        toolDir.resolve("node_modules").mkdirs()
     }
 
     doLast {
