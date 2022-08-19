@@ -22,7 +22,7 @@ dependencies {
     api(kotlin("stdlib-js"))
     implementation(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.3.3"))
+    implementation(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.4.0"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
     implementation(npm("@aws-sdk/client-sso", "^3.145.0"))
     implementation(npm("@aws-sdk/shared-ini-file-loader", "^3.127.0"))
