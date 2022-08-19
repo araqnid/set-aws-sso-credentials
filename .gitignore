@@ -1,5 +1,6 @@
 /dist
-/node_modules
 /.idea
-/.npmrc
 /yarn-error.log
+/gradle
+/build
+.gradle
