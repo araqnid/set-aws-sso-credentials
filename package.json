@@ -13,7 +13,7 @@
     "readlines": "^0.2.0"
   },
   "devDependencies": {
-    "@swc/core": "^1.2.227",
+    "@swc/core": "^1.2.241",
     "@types/node": "^16.11.48",
     "@vercel/ncc": "^0.34.0",
     "ts-node": "^10.9.1",
