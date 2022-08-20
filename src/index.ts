@@ -1,7 +1,7 @@
 import fs from "fs"
 import {GetRoleCredentialsCommand, GetRoleCredentialsCommandOutput, SSOClient} from "@aws-sdk/client-sso";
 import {loadSharedConfigFiles} from "@aws-sdk/shared-ini-file-loader";
-import {Profile} from "@aws-sdk/types";
+import {IniSection} from "@aws-sdk/types";
 import {spawn} from "child_process";
 import readline from "readline";
 
@@ -44,7 +44,7 @@ async function attemptSSOLogin(profileName: string) {
   })
 }
 
-async function getRoleCredentialsPossiblyLogin(ssoClient: SSOClient, ssoConfig: Profile, profileName: string): Promise<GetRoleCredentialsCommandOutput> {
+async function getRoleCredentialsPossiblyLogin(ssoClient: SSOClient, ssoConfig: IniSection, profileName: string): Promise<GetRoleCredentialsCommandOutput> {
   try {
     return await ssoClient.send(new GetRoleCredentialsCommand({
       accountId: ssoConfig.sso_account_id,
