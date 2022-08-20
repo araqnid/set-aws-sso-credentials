@@ -1,8 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
 import kotlinx.coroutines.await
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlin.js.Promise
 
 external interface IteratorResult<out T> {
@@ -28,5 +27,11 @@ fun <T> Paginator<T>.asFlow(): Flow<T> {
             if (result.done) break
             emit(result.value)
         }
+    }
+}
+
+fun <T, U> Paginator<T>.flattenedAsFlow(flatten: (T) -> Array<U>?): Flow<U> {
+    return asFlow().transform { output ->
+        flatten(output)?.let { emitAll(it.asFlow()) }
     }
 }

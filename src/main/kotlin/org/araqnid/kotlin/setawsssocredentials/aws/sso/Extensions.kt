@@ -1,6 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials.aws.sso
 
 import kotlinx.coroutines.flow.*
+import org.araqnid.kotlin.setawsssocredentials.aws.flattenedAsFlow
 import org.araqnid.kotlin.setawsssocredentials.aws.sendCancellable
 import org.araqnid.kotlin.setawsssocredentials.jsObject
 
@@ -61,18 +62,18 @@ fun SSOClient.listAccountRolesAsFlow(
     pageSize: Int? = null,
     startingToken: String? = null,
     stopOnSameToken: Boolean = false,
-) = flow {
-    var currentToken = startingToken
-    while (true) {
-        val result = listAccountRoles(accessToken, accountId, nextToken = currentToken, maxResults = pageSize)
-        result.roleList?.let { emitAll(it.asFlow()) }
-        val nextToken = result.nextToken
-        if (nextToken == null || stopOnSameToken && nextToken == currentToken)
-            break
-        else
-            currentToken = nextToken
-    }
-}
+) = paginateListAccountRoles(
+    jsObject {
+        client = this@listAccountRolesAsFlow
+        this.pageSize = pageSize
+        this.startingToken = startingToken
+        this.stopOnSameToken = stopOnSameToken
+    },
+    jsObject {
+        this.accessToken = accessToken
+        this.accountId = accountId
+    },
+).flattenedAsFlow { it.roleList }
 
 /**
  * Lists all Amazon Web Services accounts assigned to the user. These Amazon Web Services accounts are assigned by the
@@ -109,18 +110,17 @@ fun SSOClient.listAccountsAsFlow(
     pageSize: Int? = null,
     startingToken: String? = null,
     stopOnSameToken: Boolean = false,
-) = flow {
-    var currentToken = startingToken
-    while (true) {
-        val result = listAccounts(accessToken, nextToken = currentToken, maxResults = pageSize)
-        result.accountList?.let { emitAll(it.asFlow()) }
-        val nextToken = result.nextToken
-        if (nextToken == null || stopOnSameToken && nextToken == currentToken)
-            break
-        else
-            currentToken = nextToken
-    }
-}
+) = paginateListAccounts(
+    jsObject {
+        client = this@listAccountsAsFlow
+        this.pageSize = pageSize
+        this.startingToken = startingToken
+        this.stopOnSameToken = stopOnSameToken
+    },
+    jsObject {
+        this.accessToken = accessToken
+    },
+).flattenedAsFlow { it.accountList }
 
 /**
  * Removes the locally stored SSO tokens from the client-side cache and sends an API call to
