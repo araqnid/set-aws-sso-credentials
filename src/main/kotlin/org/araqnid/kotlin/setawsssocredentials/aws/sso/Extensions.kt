@@ -61,13 +61,13 @@ fun SSOClient.listAccountRolesAsFlow(
     accountId: String,
     pageSize: Int? = null,
     startingToken: String? = null,
-    stopOnSameToken: Boolean = false,
+    stopOnSameToken: Boolean? = false,
 ) = paginateListAccountRoles(
     jsObject {
         client = this@listAccountRolesAsFlow
-        this.pageSize = pageSize
-        this.startingToken = startingToken
-        this.stopOnSameToken = stopOnSameToken
+        if (pageSize != null) this.pageSize = pageSize
+        if (startingToken != null) this.startingToken = startingToken
+        if (stopOnSameToken != null) this.stopOnSameToken = stopOnSameToken
     },
     jsObject {
         this.accessToken = accessToken
@@ -109,13 +109,13 @@ fun SSOClient.listAccountsAsFlow(
     accessToken: String,
     pageSize: Int? = null,
     startingToken: String? = null,
-    stopOnSameToken: Boolean = false,
+    stopOnSameToken: Boolean? = null,
 ) = paginateListAccounts(
     jsObject {
         client = this@listAccountsAsFlow
-        this.pageSize = pageSize
-        this.startingToken = startingToken
-        this.stopOnSameToken = stopOnSameToken
+        if (pageSize != null) this.pageSize = pageSize
+        if (startingToken != null) this.startingToken = startingToken
+        if (stopOnSameToken != null) this.stopOnSameToken = stopOnSameToken
     },
     jsObject {
         this.accessToken = accessToken
