@@ -1,12 +1,8 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
 import kotlinx.coroutines.await
-import kotlinx.coroutines.suspendCancellableCoroutine
-import org.araqnid.kotlin.setawsssocredentials.AbortController
 import org.araqnid.kotlin.setawsssocredentials.jsObject
 import org.araqnid.kotlin.setawsssocredentials.withAbortSignal
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.js.Promise
 
 external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientConfiguration> {
@@ -34,23 +30,6 @@ external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientC
      * Otherwise, sockets might stay open for quite a long time before the server terminates them.
      */
     fun destroy()
-}
-
-suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.sendCancellable0(command: Command<CI, CO>): CO {
-    return suspendCancellableCoroutine { cont ->
-        val abortController = AbortController()
-        cont.invokeOnCancellation {
-            abortController.abort(it)
-        }
-        send(command, jsObject {
-            this.abortSignal = abortController.signal
-        }) { err, result ->
-            if (err != null)
-                cont.resumeWithException(err.unsafeCast<Throwable>())
-            else
-                cont.resume(result.unsafeCast<CO>())
-        }
-    }
 }
 
 suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.sendCancellable(command: Command<CI, CO>): CO {
