@@ -64,43 +64,31 @@ async function getRoleCredentialsPossiblyLogin(ssoClient: SSOClient, ssoConfig: 
   }
 }
 
-async function main(profile?: string) {
-  const sharedConfig = await loadSharedConfigFiles()
-  if (profile) {
-    const ssoConfig = sharedConfig.configFile[profile]
-    if (!ssoConfig) throw new Error(`No such profile in $HOME/.aws/config: ${profile}`)
-    const ssoClient = new SSOClient({region: ssoConfig.sso_region})
-    try {
-      const response = await getRoleCredentialsPossiblyLogin(ssoClient, ssoConfig, profile)
+const [, , profile] = process.argv
+const sharedConfig = await loadSharedConfigFiles()
+if (profile) {
+  const ssoConfig = sharedConfig.configFile[profile]
+  if (!ssoConfig) throw new Error(`No such profile in $HOME/.aws/config: ${profile}`)
+  const ssoClient = new SSOClient({region: ssoConfig.sso_region})
+  try {
+    const response = await getRoleCredentialsPossiblyLogin(ssoClient, ssoConfig, profile)
 
-      if (response.roleCredentials) {
-        const {accessKeyId, secretAccessKey, sessionToken} = response.roleCredentials
-        process.stdout.write(`AWS_ACCESS_KEY_ID=${accessKeyId};\n`)
-        process.stdout.write(`AWS_SECRET_ACCESS_KEY=${secretAccessKey};\n`)
-        process.stdout.write(`AWS_SESSION_TOKEN=${sessionToken};\n`)
-        process.stdout.write(`AWS_DEFAULT_REGION=${ssoConfig.sso_region};\n`)
-        process.stdout.write(`export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;\n`)
-      }
-    } finally {
-      ssoClient.destroy()
+    if (response.roleCredentials) {
+      const {accessKeyId, secretAccessKey, sessionToken} = response.roleCredentials
+      process.stdout.write(`AWS_ACCESS_KEY_ID=${accessKeyId};\n`)
+      process.stdout.write(`AWS_SECRET_ACCESS_KEY=${secretAccessKey};\n`)
+      process.stdout.write(`AWS_SESSION_TOKEN=${sessionToken};\n`)
+      process.stdout.write(`AWS_DEFAULT_REGION=${ssoConfig.sso_region};\n`)
+      process.stdout.write(`export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;\n`)
     }
+  } finally {
+    ssoClient.destroy()
   }
-  else {
-    for (const [name, value] of Object.entries(sharedConfig.configFile)) {
-      if (value.sso_start_url) {
-        process.stdout.write(`${name}\n`)
-      }
+}
+else {
+  for (const [name, value] of Object.entries(sharedConfig.configFile)) {
+    if (value.sso_start_url) {
+      process.stdout.write(`${name}\n`)
     }
   }
 }
-
-const [, , profile] = process.argv
-main(profile).then(
-  () => {
-    process.exit(0)
-  },
-  err => {
-    console.error(`Fatal error`, err)
-    process.exit(1)
-  }
-)

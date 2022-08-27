@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "ncc build src/index.ts --v8-cache --source-map -o dist",
+    "build": "ncc build src/index.ts --source-map -o dist",
     "start": "ts-node src"
   },
+  "type": "module",
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-sso": "^3.159.0",
