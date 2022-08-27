@@ -10,10 +10,12 @@
   "dependencies": {
     "@aws-sdk/client-sso": "^3.159.0",
     "@aws-sdk/shared-ini-file-loader": "^3.159.0",
-    "readlines": "^0.2.0"
+    "readlines": "^0.2.0",
+    "tslib": "^2.4.0"
   },
   "devDependencies": {
     "@swc/core": "^1.2.244",
+    "@tsconfig/node16": "^1.0.3",
     "@types/node": "^16.11.56",
     "@vercel/ncc": "^0.34.0",
     "ts-node": "^10.9.1",
