@@ -289,10 +289,17 @@
   resolved "https://registry.yarnpkg.com/@aws-sdk/service-error-classification/-/service-error-classification-3.127.0.tgz#64b69215b2525e3b6806856187ef54b00c0f85d1"
   integrity sha512-wjZY9rnlA8SPrICUumTYicEKtK4/yKB62iadUk66hxe8MrH8JhuHH2NqIad0Pt/bK/YtNVhd3yb4pRapOeY5qQ==
 
-"@aws-sdk/shared-ini-file-loader@3.127.0", "@aws-sdk/shared-ini-file-loader@^3.127.0":
+"@aws-sdk/shared-ini-file-loader@3.127.0":
   version "3.127.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/shared-ini-file-loader/-/shared-ini-file-loader-3.127.0.tgz#019c5512bf92f954f6aca6f6811e38fe048aadf6"
   integrity sha512-S3Nn4KRTqoJsB/TbRZSWBBUrkckNMR0Juqz7bOB+wupVvddKP6IcpspSC/GX9zgJjVMV8iGisZ6AUsYsC5r+cA==
+  dependencies:
+    tslib "^2.3.1"
+
+"@aws-sdk/shared-ini-file-loader@^3.159.0":
+  version "3.159.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/shared-ini-file-loader/-/shared-ini-file-loader-3.159.0.tgz#c3e5f98da6ef70f059ddb986b4beb7e20037179d"
+  integrity sha512-scK9Aravvv3xLUnLK4E8mMV89iuQuvZeTVGDJWn2L9dDHSWFZ4HJwdApsfR6fxjTnh5PE1eGheLZzf2UUwkO2g==
   dependencies:
     tslib "^2.3.1"
 
