@@ -289,11 +289,19 @@
   resolved "https://registry.yarnpkg.com/@aws-sdk/service-error-classification/-/service-error-classification-3.162.0.tgz#b07ed4ef541ec4d3d3cfe93efae054e3d39b5a1b"
   integrity sha512-AD9XL3CHFzwVWNEzdTo9aRnJl1ImqrRLlJ5zR/5ihTIJ68ZTYEiYP4vNKSCV6UfQ+vaaRNgLwiAx7JXzY54awg==
 
-"@aws-sdk/shared-ini-file-loader@3.162.0", "@aws-sdk/shared-ini-file-loader@^3.162.0":
+"@aws-sdk/shared-ini-file-loader@3.162.0":
   version "3.162.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/shared-ini-file-loader/-/shared-ini-file-loader-3.162.0.tgz#53bc40d774f4411200104e415cbe27a3dea110f7"
   integrity sha512-AGxISXns+1o6Pw+SPizFJDTw4Lwm+JSwhycCNhFU3JfdLsKfLY08JV4JHlcc+TyY4a8HhnGvE3r5t2f2dPLIsA==
   dependencies:
+    tslib "^2.3.1"
+
+"@aws-sdk/shared-ini-file-loader@^3.193.0":
+  version "3.193.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/shared-ini-file-loader/-/shared-ini-file-loader-3.193.0.tgz#fc0e8d88bdebfbb98f39d3d459fd455c644e4272"
+  integrity sha512-hnvZup8RSpFXfah7Rrn6+lQJnAOCO+OiDJ2R/iMgZQh475GRQpLbu3cPhCOkjB14vVLygJtW8trK/0+zKq93bQ==
+  dependencies:
+    "@aws-sdk/types" "3.193.0"
     tslib "^2.3.1"
 
 "@aws-sdk/signature-v4@3.163.0":
@@ -322,10 +330,10 @@
   resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.162.0.tgz#e908ff1a5de6bd06d7d6b88a648b384592acf7e2"
   integrity sha512-NBmuwVujH8fURDMvBHkHrYu/JAfG6Js/Bu0mC4o2Kdo5mRa3fD/N9kK0dEAxU1Rxp4wY2E++V9j2ZCw1KBGrSg==
 
-"@aws-sdk/types@^3.1.0":
-  version "3.127.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.127.0.tgz#a7bafc47ee2328eee2453087521e6c3a39e7278d"
-  integrity sha512-e0wtx2IkOl7rwfKfLH5pPTzQ+d45V7b1WrjeL0WDI8kOu6w+sXmhNxI6uM2kf0k4NiTLN84lW290AEWupey9Og==
+"@aws-sdk/types@3.193.0", "@aws-sdk/types@^3.1.0":
+  version "3.193.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/types/-/types-3.193.0.tgz#a2079ccda7312c7ba535b4379c97980141948fd9"
+  integrity sha512-LV/wcPolRZKORrcHwkH59QMCkiDR5sM+9ZtuTxvyUGG2QFW/kjoxs08fUF10OWNJMrotBI+czDc5QJRgN8BlAw==
 
 "@aws-sdk/url-parser@3.162.0":
   version "3.162.0"
