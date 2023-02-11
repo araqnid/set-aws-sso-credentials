@@ -1,12 +1,12 @@
 package org.araqnid.kotlin.setawsssocredentials.aws.sso
 
+import js.core.jso
 import kotlinx.coroutines.flow.*
 import org.araqnid.kotlin.setawsssocredentials.aws.flattenedAsFlow
 import org.araqnid.kotlin.setawsssocredentials.aws.sendCancellable
-import org.araqnid.kotlin.setawsssocredentials.jsObject
 
 fun createSSOClient(region: String? = null, defaultsMode: String? = null): SSOClient {
-    return SSOClient(jsObject {
+    return SSOClient(jso {
         if (region != null) this.region = region
         if (defaultsMode != null) this.defaultsMode = defaultsMode
     })
@@ -22,7 +22,7 @@ suspend inline fun SSOClient.getRoleCredentials(
     accountId: String,
     accessToken: String,
     roleName: String
-): GetRoleCredentialsCommandOutput = sendCancellable(GetRoleCredentialsCommand(jsObject {
+): GetRoleCredentialsCommandOutput = sendCancellable(GetRoleCredentialsCommand(jso {
     this.roleName = roleName
     this.accountId = accountId
     this.accessToken = accessToken
@@ -41,7 +41,7 @@ suspend inline fun SSOClient.listAccountRoles(
     accountId: String,
     nextToken: String? = null,
     maxResults: Number? = null,
-): ListAccountRolesCommandOutput = sendCancellable(ListAccountRolesCommand(jsObject {
+): ListAccountRolesCommandOutput = sendCancellable(ListAccountRolesCommand(jso {
     this.accessToken = accessToken
     this.accountId = accountId
     this.nextToken = nextToken
@@ -63,13 +63,13 @@ fun SSOClient.listAccountRolesAsFlow(
     startingToken: String? = null,
     stopOnSameToken: Boolean? = false,
 ) = paginateListAccountRoles(
-    jsObject {
+    jso {
         client = this@listAccountRolesAsFlow
         if (pageSize != null) this.pageSize = pageSize
         if (startingToken != null) this.startingToken = startingToken
         if (stopOnSameToken != null) this.stopOnSameToken = stopOnSameToken
     },
-    jsObject {
+    jso {
         this.accessToken = accessToken
         this.accountId = accountId
     },
@@ -89,7 +89,7 @@ suspend inline fun SSOClient.listAccounts(
     accessToken: String,
     nextToken: String? = null,
     maxResults: Number? = null,
-): ListAccountsCommandOutput = sendCancellable(ListAccountsCommand(jsObject {
+): ListAccountsCommandOutput = sendCancellable(ListAccountsCommand(jso {
     this.accessToken = accessToken
     this.nextToken = nextToken
     this.maxResults = maxResults
@@ -111,13 +111,13 @@ fun SSOClient.listAccountsAsFlow(
     startingToken: String? = null,
     stopOnSameToken: Boolean? = null,
 ) = paginateListAccounts(
-    jsObject {
+    jso {
         client = this@listAccountsAsFlow
         if (pageSize != null) this.pageSize = pageSize
         if (startingToken != null) this.startingToken = startingToken
         if (stopOnSameToken != null) this.stopOnSameToken = stopOnSameToken
     },
-    jsObject {
+    jso {
         this.accessToken = accessToken
     },
 ).flattenedAsFlow { it.accountList }
@@ -141,6 +141,6 @@ fun SSOClient.listAccountsAsFlow(
  */
 suspend inline fun SSOClient.logout(
     accessToken: String,
-): LogoutCommandOutput = sendCancellable(LogoutCommand(jsObject {
+): LogoutCommandOutput = sendCancellable(LogoutCommand(jso {
     this.accessToken = accessToken
 }))
