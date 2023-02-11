@@ -2,7 +2,7 @@
 
 package org.araqnid.kotlin.setawsssocredentials.aws
 
-import org.araqnid.kotlin.setawsssocredentials.JsRecord
+import node.Dict
 import kotlin.js.Promise
 
 external interface SharedConfigInit {
@@ -25,8 +25,8 @@ external interface SharedConfigInit {
 // typealias ParsedIniData = JsRecord<IniSection>
 
 external interface SharedConfigFiles {
-    val credentialsFile: /* ParsedIniData */ JsRecord<JsRecord<String?>>
-    val configFile: /* ParsedIniData */ JsRecord<JsRecord<String?>>
+    val credentialsFile: /* ParsedIniData */ Dict<Dict<String>>
+    val configFile: /* ParsedIniData */ Dict<Dict<String>>
 }
 
 external fun loadSharedConfigFiles(init: SharedConfigInit = definedExternally): Promise<SharedConfigFiles>

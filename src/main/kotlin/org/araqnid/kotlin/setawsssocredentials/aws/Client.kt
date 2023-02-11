@@ -1,7 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
+import js.core.jso
 import kotlinx.coroutines.await
-import org.araqnid.kotlin.setawsssocredentials.jsObject
 import org.araqnid.kotlin.setawsssocredentials.withAbortSignal
 import kotlin.js.Promise
 
@@ -34,7 +34,7 @@ external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientC
 
 suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.sendCancellable(command: Command<CI, CO>): CO {
     return withAbortSignal { abortSignal ->
-        send(command, jsObject<HttpHandlerOptions> { this.abortSignal = abortSignal }).await()
+        send(command, jso<HttpHandlerOptions> { this.abortSignal = abortSignal }).await()
     }
 }
 

@@ -1,7 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
-import org.araqnid.kotlin.setawsssocredentials.AbortSignal
-import org.araqnid.kotlin.setawsssocredentials.JsRecord
+import node.Dict
+import web.abort.AbortSignal
 
 /**
  * A mapping of header names to string values. Multiple values for the same
@@ -21,7 +21,7 @@ import org.araqnid.kotlin.setawsssocredentials.JsRecord
  * properties in favor of the other. The headers may or may not be combined, and
  * the SDK will not deterministically select which header candidate to use.
  */
-typealias HeaderBag = JsRecord<String>
+typealias HeaderBag = Dict<String>
 
 external interface HttpMessage {
     var headers: HeaderBag
@@ -32,7 +32,7 @@ external interface HttpMessage {
  * second being used when a parameter contains a list of values. Value can be set
  * to null when query is not in key-value pairs shape
  */
-typealias QueryParameterBag = JsRecord<Any> // Record<string, string | string[] | null>
+typealias QueryParameterBag = Dict<Any> // Record<string, string | string[] | null>
 
 external interface Endpoint {
     var protocol: String

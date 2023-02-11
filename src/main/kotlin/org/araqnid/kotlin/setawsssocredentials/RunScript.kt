@@ -2,6 +2,7 @@ package org.araqnid.kotlin.setawsssocredentials
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import node.process.process
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -28,9 +29,9 @@ fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend C
     job.invokeOnCompletion { ex ->
         if (ex != null) {
             console.error("Fatal error", ex)
-            Process.exit(1)
+            process.exit(1)
         } else {
-            Process.exit(0)
+            process.exit(0)
         }
     }
 

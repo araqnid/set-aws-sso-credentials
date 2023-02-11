@@ -1,9 +1,15 @@
 package org.araqnid.kotlin.setawsssocredentials
 
+import js.core.Record
+import js.core.get
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import node.WritableStream
+import node.buffer.BufferEncoding
+import node.fs.readFile
+import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
@@ -15,11 +21,11 @@ private val json = Json { ignoreUnknownKeys = true }
 
 private suspend fun loadAccessToken(): String? {
     try {
-        val credentialsCacheFile = "${Process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json"
+        val credentialsCacheFile = "${process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json"
         val fileJson = json.decodeFromString<CredentialsCacheFile>(
             readFile(
                 credentialsCacheFile,
-                "utf-8"
+                BufferEncoding.utf8
             )
         )
         return fileJson.accessToken
@@ -35,10 +41,10 @@ private suspend fun attemptSSOLogin(profileName: String) {
     command("aws", "--profile", profileName, "sso", "login").collect { output ->
         when (output) {
             is CommandOutput.Stdout ->
-                Process.stderr.write("aws sso login: ${output.text}\n")
+                process.stderr.unsafeCast<WritableStream>().write("aws sso login: ${output.text}\n")
 
             is CommandOutput.Stderr ->
-                Process.stderr.write("aws sso login:(stderr): ${output.text}\n")
+                process.stderr.unsafeCast<WritableStream>().write("aws sso login:(stderr): ${output.text}\n")
 
             is CommandOutput.Exit ->
                 if (output.exitCode > 0)
@@ -81,7 +87,7 @@ private suspend fun getRoleCredentialsPossiblyLogin(
 }
 
 fun main() = runScript {
-    val args = Process.argv.drop(2)
+    val args = process.argv.drop(2)
     val profile = if (args.isNotEmpty()) args[0] else null
     val sharedConfig = loadSharedConfigFiles().await()
     if (profile != null) {
@@ -108,3 +114,13 @@ fun main() = runScript {
         }
     }
 }
+
+private val <K : Any, V : Any> Record<K, V>.entries: Iterable<Pair<K, V>>
+    get() = Iterable {
+        iterator {
+            val underlying = js("Object.entries")(this@entries).unsafeCast<Array<Array<dynamic>>>()
+            for ((key, value) in underlying) {
+                yield(Pair(key, value))
+            }
+        }
+    }
