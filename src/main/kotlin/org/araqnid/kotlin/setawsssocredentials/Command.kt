@@ -78,24 +78,23 @@ private fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.ut
     return chunks
 }
 
-private fun Flow<String>.splitLines(): Flow<String> {
+internal fun Flow<String>.splitLines(): Flow<String> {
     return flow {
         val residual = StringBuilder()
 
         collect { chunk ->
             var lastBreak = -1
-            for (i in chunk.indices) {
-                if (chunk[i] == '\n') {
-                    if (lastBreak >= 0) {
-                        val line = chunk.substring(lastBreak + 1, i)
-                        emit(line)
-                    } else {
-                        residual.append(chunk.subSequence(0, i))
-                        emit(residual.toString())
-                        residual.clear()
-                    }
-                    lastBreak = i
+            while (true) {
+                val nextBreak = chunk.indexOf('\n', lastBreak + 1)
+                if (nextBreak < 0) break
+                if (lastBreak >= 0 || residual.isEmpty()) {
+                    emit(chunk.substring(lastBreak + 1, nextBreak))
+                } else {
+                    residual.append(chunk.subSequence(0, nextBreak))
+                    emit(residual.toString())
+                    residual.clear()
                 }
+                lastBreak = nextBreak
             }
             residual.append(if (lastBreak >= 0) chunk.subSequence(lastBreak + 1, chunk.length) else chunk)
         }
