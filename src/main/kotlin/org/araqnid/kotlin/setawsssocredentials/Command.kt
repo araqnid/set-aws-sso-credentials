@@ -2,13 +2,8 @@ package org.araqnid.kotlin.setawsssocredentials
 
 import js.core.jso
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import node.buffer.BufferEncoding
 import node.childProcess.SpawnOptions
@@ -52,30 +47,31 @@ sealed interface CommandOutput {
     data class Exit(val exitCode: Int) : CommandOutput
 }
 
-private fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): ReceiveChannel<String> {
-    val chunks = Channel<String>()
-    setEncoding(encoding)
-    pipe(Writable(jso {
-        decodeStrings = false
-        write = write@{ chunk, _, callback ->
-            val fastResult = chunks.trySend(chunk.unsafeCast<String>())
-            if (fastResult.isSuccess) {
+private fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flow<String> {
+    return channelFlow {
+        setEncoding(encoding)
+        pipe(Writable(jso {
+            decodeStrings = false
+            write = write@{ chunk, _, callback ->
+                val fastResult = trySend(chunk.unsafeCast<String>())
+                if (fastResult.isSuccess) {
+                    callback(null)
+                    return@write
+                }
+                val block: suspend () -> Unit = {
+                    send(chunk.unsafeCast<String>())
+                }
+                block.startCoroutine(Continuation(EmptyCoroutineContext) { res ->
+                    callback(res.fold({ null }, { it.unsafeCast<Error>() }))
+                })
+            }
+            final = { callback ->
+                close()
                 callback(null)
-                return@write
             }
-            val block: suspend () -> Unit = {
-                chunks.send(chunk.unsafeCast<String>())
-            }
-            block.startCoroutine(Continuation(EmptyCoroutineContext) { res ->
-                callback(res.fold({ null }, { it.unsafeCast<Error>() }))
-            })
-        }
-        final = { callback ->
-            chunks.close()
-            callback(null)
-        }
-    }))
-    return chunks
+        }))
+        awaitClose()
+    }
 }
 
 internal fun Flow<String>.splitLines(): Flow<String> {
@@ -115,14 +111,12 @@ fun command(command: String, vararg args: String): Flow<CommandOutput> {
 
         val deferredExitCode = CompletableDeferred<Int>()
 
-        val stdoutChunks = spawned.stdout.readTextChunks()
         val stdout = launch {
-            stdoutChunks.consumeAsFlow().splitLines().collect { send(CommandOutput.Stdout(it)) }
+            spawned.stdout.readTextChunks().splitLines().collect { send(CommandOutput.Stdout(it)) }
         }
 
-        val stderrChunks = spawned.stderr.readTextChunks()
         val stderr = launch {
-            stderrChunks.consumeAsFlow().splitLines().collect { send(CommandOutput.Stderr(it)) }
+            spawned.stderr.readTextChunks().splitLines().collect { send(CommandOutput.Stderr(it)) }
         }
 
         spawned.onError { err ->
