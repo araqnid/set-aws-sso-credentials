@@ -13,8 +13,13 @@ kotlin {
         nodejs()
         useCommonJs()
         binaries.executable()
-        compilations["main"].packageJson {
-        }
+        binaries.withType<org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary>()
+            .matching { it.name == "productionExecutable" }
+            .configureEach {
+                linkTask.configure {
+                    compilerOptions.freeCompilerArgs.add("-Xir-minimized-member-names=false")
+                }
+            }
     }
 }
 
