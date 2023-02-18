@@ -26,4 +26,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: build/set-aws-sso-credentials-kotlin-nodejs.zip
+          path: build/packageNodeJsDistributableWithNCC
