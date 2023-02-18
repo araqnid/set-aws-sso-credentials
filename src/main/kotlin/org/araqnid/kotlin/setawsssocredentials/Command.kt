@@ -3,39 +3,20 @@ package org.araqnid.kotlin.setawsssocredentials
 import js.core.jso
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import node.buffer.BufferEncoding
-import node.childProcess.SpawnOptions
-import node.events.EventEmitter
-import node.events.EventType
 import node.stream.Readable
 import node.stream.Writable
+import org.araqnid.kotlin.setawsssocredentials.childProcess.onClose
+import org.araqnid.kotlin.setawsssocredentials.childProcess.onError
+import org.araqnid.kotlin.setawsssocredentials.childProcess.spawn
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
-
-@JsModule("node:child_process")
-private external object ChildProcess {
-    fun spawn(command: String, args: Array<out String>, options: SpawnOptions): Subprocess
-
-    class Subprocess : EventEmitter {
-        val stdout: Readable
-        val stderr: Readable
-        val stdin: Writable
-        fun kill(signal: String): Boolean
-        fun kill(signal: Int): Boolean
-        fun kill(): Boolean
-    }
-}
-
-private inline fun ChildProcess.Subprocess.onError(noinline cb: (err: Throwable) -> Unit) {
-    on(EventType("error"), cb.unsafeCast<(value: Any?) -> Unit>())
-}
-
-private inline fun ChildProcess.Subprocess.onClose(noinline cb: (exitCode: Int) -> Unit) {
-    on(EventType("close"), cb.unsafeCast<(value: Any?) -> Unit>())
-}
 
 sealed interface CommandOutput {
     interface TextOutput {
@@ -105,7 +86,7 @@ internal fun Flow<String>.splitLines(): Flow<String> {
  */
 fun command(command: String, vararg args: String): Flow<CommandOutput> {
     return callbackFlow {
-        val spawned = ChildProcess.spawn(command, args, jso {
+        val spawned = spawn(command, args, jso {
             stdio = arrayOf("inherit", "pipe", "pipe")
         })
 
