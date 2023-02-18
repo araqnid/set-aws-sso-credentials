@@ -8,6 +8,11 @@ repositories {
     mavenCentral()
 }
 
+fun isPropertySet(key: String, valueIfNotSpecified: Boolean = false): Boolean {
+    val value = project.properties[key]
+    return if (value is String) value.toBoolean() else valueIfNotSpecified
+}
+
 kotlin {
     js(IR) {
         nodejs()
@@ -17,8 +22,7 @@ kotlin {
             .matching { it.name == "productionExecutable" }
             .configureEach {
                 linkTask.configure {
-                    val fullMemberNames = project.properties["kotlin.fullMemberNames"]
-                    if (fullMemberNames is String && fullMemberNames.toBoolean()) {
+                    if (isPropertySet("kotlin.fullMemberNames")) {
                         compilerOptions.freeCompilerArgs.add("-Xir-minimized-member-names=false")
                     }
                 }
@@ -48,7 +52,7 @@ dependencies {
 
 nodeJsApplication {
     v8cache.set(false)
-    minify.set(false)
+    minify.set(isPropertySet("nodejs.minify", valueIfNotSpecified = true))
     useNcc.set(properties["nodejs.package"] != "exploded")
     moduleName.set("set-aws-sso-credentials-kotlin")
 }
