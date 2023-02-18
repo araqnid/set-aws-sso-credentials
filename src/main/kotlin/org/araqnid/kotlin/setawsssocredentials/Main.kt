@@ -130,12 +130,6 @@ fun main() = runScript {
     }
 }
 
-private val <K : Any, V : Any> Record<K, V>.entries: Iterable<Pair<K, V>>
-    get() = Iterable {
-        iterator {
-            val underlying = js("Object.entries")(this@entries).unsafeCast<Array<Array<dynamic>>>()
-            for ((key, value) in underlying) {
-                yield(Pair(key, value))
-            }
-        }
-    }
+private val <K : Any, V : Any> Record<K, V>.entries: List<Pair<K, V>>
+    get() = js("Object.entries")(this@entries).unsafeCast<Array<Array<dynamic>>>()
+        .map { (key, value) -> Pair(key, value) }
