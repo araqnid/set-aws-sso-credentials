@@ -49,3 +49,11 @@ nodeJsApplication {
     useNcc.set(properties["nodejs.package"] != "exploded")
     moduleName.set("set-aws-sso-credentials-kotlin")
 }
+
+node {
+    val nodejsVersion = properties["nodejs.version"]
+    if (nodejsVersion is String) {
+        download.set(true)
+        version.set(nodejsVersion)
+    }
+}
