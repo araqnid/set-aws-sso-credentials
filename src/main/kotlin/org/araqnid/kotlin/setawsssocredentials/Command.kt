@@ -14,9 +14,6 @@ import node.stream.Writable
 import org.araqnid.kotlin.setawsssocredentials.childProcess.onClose
 import org.araqnid.kotlin.setawsssocredentials.childProcess.onError
 import org.araqnid.kotlin.setawsssocredentials.childProcess.spawn
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.startCoroutine
 
 sealed interface CommandOutput {
     interface TextOutput {
@@ -33,18 +30,20 @@ private fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.ut
         setEncoding(encoding)
         pipe(Writable(jso {
             decodeStrings = false
-            write = write@{ chunk, _, callback ->
+            write = { chunk, _, callback ->
                 val fastResult = trySend(chunk.unsafeCast<String>())
                 if (fastResult.isSuccess) {
                     callback(null)
-                    return@write
+                } else {
+                    launch {
+                        try {
+                            send(chunk.unsafeCast<String>())
+                            callback(null)
+                        } catch (err: Throwable) {
+                            callback(err.unsafeCast<Error>())
+                        }
+                    }
                 }
-                val block: suspend () -> Unit = {
-                    send(chunk.unsafeCast<String>())
-                }
-                block.startCoroutine(Continuation(EmptyCoroutineContext) { res ->
-                    callback(res.fold({ null }, { it.unsafeCast<Error>() }))
-                })
             }
             final = { callback ->
                 close()
