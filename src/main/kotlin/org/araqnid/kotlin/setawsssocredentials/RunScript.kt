@@ -13,19 +13,6 @@ fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend C
     val composedContext = context + job
     val scope = CoroutineScope(composedContext)
 
-    val completion = object : Continuation<Unit> {
-        override val context: CoroutineContext
-            get() = composedContext
-
-        override fun resumeWith(result: Result<Unit>) {
-            result.fold({
-                job.complete()
-            }, { ex ->
-                job.completeExceptionally(ex)
-            })
-        }
-    }
-
     job.invokeOnCompletion { ex ->
         if (ex != null) {
             console.error("Fatal error", ex)
@@ -35,5 +22,11 @@ fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend C
         }
     }
 
-    body.startCoroutine(scope, completion)
+    body.startCoroutine(scope, Continuation(composedContext) { result ->
+        result.fold({
+            job.complete()
+        }, { ex ->
+            job.completeExceptionally(ex)
+        })
+    })
 }
