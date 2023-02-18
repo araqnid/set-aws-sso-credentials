@@ -15,10 +15,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - name: Set up build properties
-        run: |
-          echo '' > gradle.properties
-          echo nodejs.package=ncc >> gradle.properties
+      - name: Clear build properties
+        run: rm -fv gradle.properties
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
