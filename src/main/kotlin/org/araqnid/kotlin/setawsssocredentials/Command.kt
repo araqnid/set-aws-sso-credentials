@@ -41,6 +41,7 @@ private fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.ut
                             callback(null)
                         } catch (err: Throwable) {
                             callback(err.unsafeCast<Error>())
+                            throw err
                         }
                     }
                 }
