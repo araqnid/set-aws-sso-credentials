@@ -11,6 +11,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Set up build properties
+        run: |
+          echo '' > gradle.properties
+          echo nodejs.package=ncc >> gradle.properties
       - name: Build
         uses: gradle/gradle-command-action@v2
         with:
