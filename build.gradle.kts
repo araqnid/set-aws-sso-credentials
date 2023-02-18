@@ -17,7 +17,10 @@ kotlin {
             .matching { it.name == "productionExecutable" }
             .configureEach {
                 linkTask.configure {
-                    compilerOptions.freeCompilerArgs.add("-Xir-minimized-member-names=false")
+                    val fullMemberNames = project.properties["kotlin.fullMemberNames"]
+                    if (fullMemberNames is String && fullMemberNames.toBoolean()) {
+                        compilerOptions.freeCompilerArgs.add("-Xir-minimized-member-names=false")
+                    }
                 }
             }
     }
