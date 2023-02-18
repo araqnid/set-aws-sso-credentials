@@ -3,6 +3,7 @@ package org.araqnid.kotlin.gradle.nodejsapplication
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 
+@Suppress("LeakingThis")
 abstract class NodeJsApplicationExtension {
     abstract val useNcc: Property<Boolean>
     abstract val minify: Property<Boolean>
