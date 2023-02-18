@@ -13,6 +13,9 @@ import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @Serializable
 private data class CredentialsCacheFile(val accessToken: String)
@@ -37,14 +40,26 @@ private suspend fun loadAccessToken(): String? {
     }
 }
 
+private suspend fun WritableStream.writeFully(str: String) {
+    suspendCoroutine { cont ->
+        write(str) { err ->
+            if (err == null) {
+                cont.resume(Unit)
+            } else {
+                cont.resumeWithException(err.unsafeCast<Throwable>())
+            }
+        }
+    }
+}
+
 private suspend fun attemptSSOLogin(profileName: String) {
     command("aws", "--profile", profileName, "sso", "login").collect { output ->
         when (output) {
             is CommandOutput.Stdout ->
-                process.stderr.unsafeCast<WritableStream>().write("aws sso login: ${output.text}\n")
+                process.stderr.unsafeCast<WritableStream>().writeFully("aws sso login: ${output.text}\n")
 
             is CommandOutput.Stderr ->
-                process.stderr.unsafeCast<WritableStream>().write("aws sso login:(stderr): ${output.text}\n")
+                process.stderr.unsafeCast<WritableStream>().writeFully("aws sso login:(stderr): ${output.text}\n")
 
             is CommandOutput.Exit ->
                 if (output.exitCode > 0)
