@@ -9,20 +9,17 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
 
 fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend CoroutineScope.() -> Unit) {
-    val job = Job()
-    val composedContext = context + job
-    val scope = CoroutineScope(composedContext)
+    val job = Job(parent = context[Job])
+    val scope = CoroutineScope(context + job)
 
     job.invokeOnCompletion { ex ->
         if (ex != null) {
             console.error("Fatal error", ex)
-            process.exit(1)
-        } else {
-            process.exit(0)
+            process.exitCode = 1
         }
     }
 
-    body.startCoroutine(scope, Continuation(composedContext) { result ->
+    body.startCoroutine(scope, Continuation(scope.coroutineContext) { result ->
         result.fold({
             job.complete()
         }, { ex ->
