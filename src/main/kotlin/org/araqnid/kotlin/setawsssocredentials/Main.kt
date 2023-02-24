@@ -8,13 +8,13 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import node.WritableStream
 import node.buffer.BufferEncoding
+import node.events.Event
 import node.fs.readFile
 import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @Serializable
@@ -42,11 +42,11 @@ private suspend fun loadAccessToken(): String? {
 
 private suspend fun WritableStream.writeFully(str: String) {
     suspendCoroutine { cont ->
-        write(str) { err ->
-            if (err == null) {
+        if (write(str)) {
+            cont.resume(Unit)
+        } else {
+            once(Event.DRAIN) {
                 cont.resume(Unit)
-            } else {
-                cont.resumeWithException(err.unsafeCast<Throwable>())
             }
         }
     }
