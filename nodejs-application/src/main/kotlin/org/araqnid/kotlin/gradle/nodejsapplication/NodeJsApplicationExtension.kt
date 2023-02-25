@@ -1,5 +1,6 @@
 package org.araqnid.kotlin.gradle.nodejsapplication
 
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 
@@ -12,6 +13,7 @@ abstract class NodeJsApplicationExtension {
     abstract val sourceMap: Property<Boolean>
     abstract val moduleName: Property<String>
     abstract val externalModules: SetProperty<String>
+    abstract val distDir: DirectoryProperty
 
     init {
         minify.convention(true)

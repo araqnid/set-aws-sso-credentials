@@ -68,7 +68,7 @@ val packageWithNccTask = tasks.register<NodeTask>("packageNodeJsDistributableWit
     dependsOn("productionExecutableCompileSync")
 
     val toolDir = buildDir.resolve(installNccTask.name)
-    val distDir = buildDir.resolve(name)
+    val distDir = nodeJsApplicationExtension.distDir.convention(layout.buildDirectory.dir(name))
     val jsBuildFile = nodeJsApplicationExtension.moduleName.map { jsBuildOutput.resolve("packages/$it/kotlin/$it.js") }
 
     inputs.dir(jsBuildOutput.resolve("node_modules"))
@@ -81,7 +81,7 @@ val packageWithNccTask = tasks.register<NodeTask>("packageNodeJsDistributableWit
     args.add("build")
     args.add(jsBuildFile.map { it.toString() })
     args.add("-o")
-    args.add(distDir.toString())
+    args.add(distDir.asFile.get().toString())
     if (nodeJsApplicationExtension.minify.get()) {
         args.add("-m")
         args.add("--license")
