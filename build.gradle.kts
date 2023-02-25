@@ -55,6 +55,7 @@ nodeJsApplication {
     minify.set(isPropertySet("nodejs.minify", valueIfNotSpecified = true))
     useNcc.set(properties["nodejs.package"] != "exploded")
     moduleName.set("set-aws-sso-credentials-kotlin")
+    distDir.set(projectDir.resolve("dist"))
 }
 
 node {
