@@ -2,7 +2,9 @@ package org.araqnid.kotlin.setawsssocredentials.aws
 
 import js.core.jso
 import kotlinx.coroutines.await
-import org.araqnid.kotlin.setawsssocredentials.withAbortSignal
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.job
+import web.abort.AbortController
 import kotlin.js.Promise
 
 external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientConfiguration> {
@@ -36,8 +38,12 @@ external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientC
 }
 
 suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.send(command: Command<CI, CO>): CO {
-    return withAbortSignal { abortSignal ->
-        sendAsync(command, jso<HttpHandlerOptions> { this.abortSignal = abortSignal }).await()
+    return coroutineScope {
+        val abortController = AbortController()
+        coroutineContext.job.invokeOnCompletion { ex ->
+            abortController.abort(ex)
+        }
+        sendAsync(command, jso<HttpHandlerOptions> { abortSignal = abortController.signal }).await()
     }
 }
 
