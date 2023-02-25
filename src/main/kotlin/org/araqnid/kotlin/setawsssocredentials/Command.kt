@@ -9,10 +9,9 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import node.buffer.BufferEncoding
+import node.events.Event
 import node.stream.Readable
 import node.stream.Writable
-import org.araqnid.kotlin.setawsssocredentials.childProcess.onClose
-import org.araqnid.kotlin.setawsssocredentials.childProcess.onError
 import org.araqnid.kotlin.setawsssocredentials.childProcess.spawn
 
 sealed interface CommandOutput {
@@ -100,11 +99,11 @@ fun command(command: String, vararg args: String): Flow<CommandOutput> {
             spawned.stderr.readTextChunks().splitLines().collect { send(CommandOutput.Stderr(it)) }
         }
 
-        spawned.onError { err ->
+        spawned.on(Event.ERROR) { err: Throwable ->
             close(err)
         }
 
-        spawned.onClose { exitCode ->
+        spawned.on(Event.CLOSE) { exitCode: Int ->
             deferredExitCode.complete(exitCode)
         }
 
