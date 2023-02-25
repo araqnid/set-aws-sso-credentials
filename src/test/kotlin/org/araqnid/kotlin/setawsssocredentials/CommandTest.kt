@@ -13,7 +13,7 @@ import kotlin.test.Test
 class CommandTest {
     @Test
     fun run_command() = runTest {
-        val lines = flowOf("\nabc\ndef\n", "gh", "i\n").splitLines().toList()
+        val lines = flowOf("\nabc\ndef\n", "gh", "i\n").extractLines().toList()
         assertThat(
             lines, equalTo(
                 listOf(
