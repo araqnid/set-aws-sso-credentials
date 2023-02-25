@@ -31,9 +31,7 @@ If you provide a profile name, it will get the SSO attributes for that profile a
 then
 write a shell fragment to set the role credentials in the environment.
 
-In this directory, run `yarn build` to compile the Typescript and bundle with the libraries into the `dist` directory,
-so that
-can be invoked without yarn.
+In this directory, run `./gradlew build` to compile the Kotlin and bundle with the libraries into the `dist` directory.
 
 ## Convenience aliases
 
