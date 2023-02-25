@@ -8,17 +8,20 @@ import kotlin.js.Promise
 external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientConfiguration> {
     val config: ResolvedClientConfiguration
 
-    fun <I : ServiceInputTypes, O : ServiceOutputTypes> send(
+    @JsName("send")
+    fun <I : ServiceInputTypes, O : ServiceOutputTypes> sendAsync(
         input: Command<I, O>,
         options: HttpHandlerOptions = definedExternally
     ): Promise<O>
 
-    fun <I : ServiceInputTypes, O : ServiceOutputTypes> send(
+    @JsName("send")
+    fun <I : ServiceInputTypes, O : ServiceOutputTypes> sendAsync(
         input: Command<I, O>,
         cb: (err: Any?, data: O?) -> Unit
     )
 
-    fun <I : ServiceInputTypes, O : ServiceOutputTypes> send(
+    @JsName("send")
+    fun <I : ServiceInputTypes, O : ServiceOutputTypes> sendAsync(
         input: Command<I, O>,
         options: HttpHandlerOptions = definedExternally,
         cb: (err: Any?, data: O?) -> Unit
@@ -32,9 +35,9 @@ external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientC
     fun destroy()
 }
 
-suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.sendCancellable(command: Command<CI, CO>): CO {
+suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.send(command: Command<CI, CO>): CO {
     return withAbortSignal { abortSignal ->
-        send(command, jso<HttpHandlerOptions> { this.abortSignal = abortSignal }).await()
+        sendAsync(command, jso<HttpHandlerOptions> { this.abortSignal = abortSignal }).await()
     }
 }
 

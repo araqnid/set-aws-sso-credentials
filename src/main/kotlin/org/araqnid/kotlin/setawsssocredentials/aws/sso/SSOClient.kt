@@ -25,17 +25,17 @@ open external class SSOClient(config: SSOClientConfig) :
     Client<SSOServiceInput, SSOServiceOutput, SSOClientResolvedConfig> {
     override val config: SSOClientResolvedConfig
 
-    override fun <I : SSOServiceInput, O : SSOServiceOutput> send(
+    override fun <I : SSOServiceInput, O : SSOServiceOutput> sendAsync(
         input: Command<I, O>,
         options: HttpHandlerOptions
     ): Promise<O>
 
-    override fun <I : SSOServiceInput, O : SSOServiceOutput> send(
+    override fun <I : SSOServiceInput, O : SSOServiceOutput> sendAsync(
         input: Command<I, O>,
         cb: (err: Any?, data: O?) -> Unit
     )
 
-    override fun <I : SSOServiceInput, O : SSOServiceOutput> send(
+    override fun <I : SSOServiceInput, O : SSOServiceOutput> sendAsync(
         input: Command<I, O>,
         options: HttpHandlerOptions,
         cb: (err: Any?, data: O?) -> Unit

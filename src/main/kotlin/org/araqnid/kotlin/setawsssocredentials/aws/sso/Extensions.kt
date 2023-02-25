@@ -3,7 +3,7 @@ package org.araqnid.kotlin.setawsssocredentials.aws.sso
 import js.core.jso
 import kotlinx.coroutines.flow.*
 import org.araqnid.kotlin.setawsssocredentials.aws.flattenedAsFlow
-import org.araqnid.kotlin.setawsssocredentials.aws.sendCancellable
+import org.araqnid.kotlin.setawsssocredentials.aws.send
 
 fun createSSOClient(region: String? = null, defaultsMode: String? = null): SSOClient {
     return SSOClient(jso {
@@ -22,7 +22,7 @@ suspend inline fun SSOClient.getRoleCredentials(
     accountId: String,
     accessToken: String,
     roleName: String
-): GetRoleCredentialsCommandOutput = sendCancellable(GetRoleCredentialsCommand(jso {
+): GetRoleCredentialsCommandOutput = send(GetRoleCredentialsCommand(jso {
     this.roleName = roleName
     this.accountId = accountId
     this.accessToken = accessToken
@@ -41,7 +41,7 @@ suspend inline fun SSOClient.listAccountRoles(
     accountId: String,
     nextToken: String? = null,
     maxResults: Number? = null,
-): ListAccountRolesCommandOutput = sendCancellable(ListAccountRolesCommand(jso {
+): ListAccountRolesCommandOutput = send(ListAccountRolesCommand(jso {
     this.accessToken = accessToken
     this.accountId = accountId
     this.nextToken = nextToken
@@ -89,7 +89,7 @@ suspend inline fun SSOClient.listAccounts(
     accessToken: String,
     nextToken: String? = null,
     maxResults: Number? = null,
-): ListAccountsCommandOutput = sendCancellable(ListAccountsCommand(jso {
+): ListAccountsCommandOutput = send(ListAccountsCommand(jso {
     this.accessToken = accessToken
     this.nextToken = nextToken
     this.maxResults = maxResults
@@ -141,6 +141,6 @@ fun SSOClient.listAccountsAsFlow(
  */
 suspend inline fun SSOClient.logout(
     accessToken: String,
-): LogoutCommandOutput = sendCancellable(LogoutCommand(jso {
+): LogoutCommandOutput = send(LogoutCommand(jso {
     this.accessToken = accessToken
 }))
