@@ -5,13 +5,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import node.buffer.BufferEncoding
 import node.events.Event
-import node.stream.Readable
-import node.stream.Writable
 import org.araqnid.kotlin.setawsssocredentials.childProcess.spawn
 
 sealed interface CommandOutput {
@@ -22,62 +17,6 @@ sealed interface CommandOutput {
     data class Stdout(override val text: String) : CommandOutput, TextOutput
     data class Stderr(override val text: String) : CommandOutput, TextOutput
     data class Exit(val exitCode: Int) : CommandOutput
-}
-
-private fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flow<String> {
-    return channelFlow {
-        setEncoding(encoding)
-        pipe(Writable(jso {
-            decodeStrings = false
-            write = { chunk, _, callback ->
-                val fastResult = trySend(chunk.unsafeCast<String>())
-                if (fastResult.isSuccess) {
-                    callback(null)
-                } else {
-                    launch {
-                        try {
-                            send(chunk.unsafeCast<String>())
-                            callback(null)
-                        } catch (err: Throwable) {
-                            callback(err.unsafeCast<Error>())
-                            throw err
-                        }
-                    }
-                }
-            }
-            final = { callback ->
-                close()
-                callback(null)
-            }
-        }))
-        awaitClose()
-    }
-}
-
-internal fun Flow<String>.splitLines(): Flow<String> {
-    return flow {
-        val residual = StringBuilder()
-
-        collect { chunk ->
-            var lastBreak = -1
-            while (true) {
-                val nextBreak = chunk.indexOf('\n', lastBreak + 1)
-                if (nextBreak < 0) break
-                if (lastBreak >= 0 || residual.isEmpty()) {
-                    emit(chunk.substring(lastBreak + 1, nextBreak))
-                } else {
-                    residual.append(chunk.subSequence(0, nextBreak))
-                    emit(residual.toString())
-                    residual.clear()
-                }
-                lastBreak = nextBreak
-            }
-            residual.append(if (lastBreak >= 0) chunk.subSequence(lastBreak + 1, chunk.length) else chunk)
-        }
-
-        if (residual.isNotEmpty())
-            emit(residual.toString())
-    }
 }
 
 /**
@@ -92,11 +31,11 @@ fun command(command: String, vararg args: String): Flow<CommandOutput> {
         val deferredExitCode = CompletableDeferred<Int>()
 
         val stdout = launch {
-            spawned.stdout.readTextChunks().splitLines().collect { send(CommandOutput.Stdout(it)) }
+            spawned.stdout.readTextChunks().extractLines().collect { send(CommandOutput.Stdout(it)) }
         }
 
         val stderr = launch {
-            spawned.stderr.readTextChunks().splitLines().collect { send(CommandOutput.Stderr(it)) }
+            spawned.stderr.readTextChunks().extractLines().collect { send(CommandOutput.Stderr(it)) }
         }
 
         spawned.on(Event.ERROR) { err: Throwable ->
