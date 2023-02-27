@@ -51,7 +51,7 @@ dependencies {
 }
 
 nodeJsApplication {
-    v8cache.set(false)
+    v8cache.set(isPropertySet("nodejs.v8cache", valueIfNotSpecified = false))
     minify.set(isPropertySet("nodejs.minify", valueIfNotSpecified = true))
     useNcc.set(properties["nodejs.package"] != "exploded")
     moduleName.set("set-aws-sso-credentials-kotlin")
