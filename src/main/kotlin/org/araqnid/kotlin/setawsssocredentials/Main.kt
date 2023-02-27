@@ -143,7 +143,7 @@ fun main() = runScript {
                     }
                 ).use { stsClient ->
                     val callerIdentity = stsClient.getCallerIdentity()
-                    printlnStderr("As ${callerIdentity.Arn} until $expirationDate$EOL")
+                    printlnStderr("As ${callerIdentity.Arn} until $expirationDate")
                 }
             }
         }
