@@ -1,6 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import node.process.process
 import kotlin.coroutines.Continuation
@@ -10,7 +11,7 @@ import kotlin.coroutines.startCoroutine
 
 fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend CoroutineScope.() -> Unit) {
     val job = Job(parent = context[Job])
-    val scope = CoroutineScope(context + job)
+    val scope = CoroutineScope(Dispatchers.Default + context + job)
 
     job.invokeOnCompletion { ex ->
         if (ex != null) {
