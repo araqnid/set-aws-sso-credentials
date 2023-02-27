@@ -2,7 +2,6 @@ script="$1"
 
 aws_sso_profile() {
     eval $( node "$script" "$1" )
-    aws sts get-caller-identity
 }
 
 echo -n "AWS SSO aliases:"

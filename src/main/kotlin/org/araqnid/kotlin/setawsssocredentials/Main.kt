@@ -10,10 +10,13 @@ import node.WritableStream
 import node.buffer.BufferEncoding
 import node.events.Event
 import node.fs.readFile
+import node.os.EOL
 import node.process.process
-import node.stream.Writable
+import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.createSTSClient
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.getCallerIdentity
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -54,14 +57,18 @@ private suspend fun WritableStream.writeFully(str: String) {
     }
 }
 
+private suspend fun printlnStderr(str: String) {
+    process.stderr.unsafeCast<WritableStream>().writeFully(str + EOL)
+}
+
 private suspend fun attemptSSOLogin(profileName: String) {
     command("aws", "--profile", profileName, "sso", "login").collect { output ->
         when (output) {
             is CommandOutput.Stdout ->
-                process.stderr.unsafeCast<WritableStream>().writeFully("aws sso login: ${output.text}\n")
+                printlnStderr("aws sso login: ${output.text}")
 
             is CommandOutput.Stderr ->
-                process.stderr.unsafeCast<WritableStream>().writeFully("aws sso login:(stderr): ${output.text}\n")
+                printlnStderr("aws sso login:(stderr): ${output.text}")
 
             is CommandOutput.Exit ->
                 if (output.exitCode > 0)
@@ -117,13 +124,27 @@ fun main() = runScript {
 
             response.roleCredentials?.let { roleCredentials ->
                 val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
-                if (expirationDate != null)
-                    process.stderr.unsafeCast<Writable>().writeFully("As \"$roleName\" on \"$accountId\" until $expirationDate" + node.os.EOL)
                 println("AWS_ACCESS_KEY_ID=${roleCredentials.accessKeyId};")
                 println("AWS_SECRET_ACCESS_KEY=${roleCredentials.secretAccessKey};")
                 println("AWS_SESSION_TOKEN=${roleCredentials.sessionToken};")
                 println("AWS_DEFAULT_REGION=${ssoConfig["sso_region"]};")
                 println("export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;")
+
+                createSTSClient(
+                    region = region,
+                    defaultsMode = "standard",
+                    credentialDefaultProvider = {
+                        fixedCredentials(
+                            roleCredentials.accessKeyId!!,
+                            roleCredentials.secretAccessKey!!,
+                            roleCredentials.sessionToken,
+                            expirationDate
+                        )
+                    }
+                ).use { stsClient ->
+                    val callerIdentity = stsClient.getCallerIdentity()
+                    printlnStderr("As ${callerIdentity.Arn} until $expirationDate$EOL")
+                }
             }
         }
     } else {

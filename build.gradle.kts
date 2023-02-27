@@ -43,6 +43,7 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappers"))
     implementation("org.jetbrains.kotlin-wrappers:kotlin-node")
     implementation(npm("@aws-sdk/client-sso", "^3.279.0"))
+    implementation(npm("@aws-sdk/client-sts", "^3.279.0"))
     implementation(npm("@aws-sdk/shared-ini-file-loader", "^3.272.0"))
 
     testImplementation(kotlin("test-js"))
