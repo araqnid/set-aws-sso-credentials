@@ -11,11 +11,13 @@ import node.buffer.BufferEncoding
 import node.events.Event
 import node.fs.readFile
 import node.process.process
+import node.stream.Writable
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.js.Date
 
 @Serializable
 private data class CredentialsCacheFile(val accessToken: String)
@@ -114,6 +116,9 @@ fun main() = runScript {
             val response = getRoleCredentialsPossiblyLogin(ssoClient, accountId, roleName, profile)
 
             response.roleCredentials?.let { roleCredentials ->
+                val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
+                if (expirationDate != null)
+                    process.stderr.unsafeCast<Writable>().writeFully("As \"$roleName\" on \"$accountId\" until $expirationDate" + node.os.EOL)
                 println("AWS_ACCESS_KEY_ID=${roleCredentials.accessKeyId};")
                 println("AWS_SECRET_ACCESS_KEY=${roleCredentials.secretAccessKey};")
                 println("AWS_SESSION_TOKEN=${roleCredentials.sessionToken};")
