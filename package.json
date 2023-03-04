@@ -9,7 +9,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-sso": "^3.279.0",
+    "@aws-sdk/client-sso": "^3.282.0",
     "@aws-sdk/shared-ini-file-loader": "^3.272.0",
     "readlines": "^0.2.0",
     "tslib": "^2.5.0"
