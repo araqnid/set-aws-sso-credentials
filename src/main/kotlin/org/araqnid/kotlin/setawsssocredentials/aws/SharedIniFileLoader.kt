@@ -1,8 +1,8 @@
 @file:JsModule("@aws-sdk/shared-ini-file-loader")
+@file:Suppress("unused")
 
 package org.araqnid.kotlin.setawsssocredentials.aws
 
-import node.Dict
 import kotlin.js.Promise
 
 external interface SharedConfigInit {
@@ -21,12 +21,9 @@ external interface SharedConfigInit {
     var configFilepath: String?
 }
 
-// typealias IniSection = JsRecord<String?>
-// typealias ParsedIniData = JsRecord<IniSection>
-
 external interface SharedConfigFiles {
-    val credentialsFile: /* ParsedIniData */ Dict<Dict<String>>
-    val configFile: /* ParsedIniData */ Dict<Dict<String>>
+    val credentialsFile: ParsedIniData
+    val configFile: ParsedIniData
 }
 
 external fun loadSharedConfigFiles(init: SharedConfigInit = definedExternally): Promise<SharedConfigFiles>
