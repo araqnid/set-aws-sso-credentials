@@ -2,7 +2,6 @@ package org.araqnid.kotlin.setawsssocredentials
 
 import js.core.Record
 import js.core.get
-import js.core.jso
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -15,10 +14,9 @@ import node.os.EOL
 import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
-import org.araqnid.kotlin.setawsssocredentials.aws.send
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.GetCallerIdentityCommand
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.createSTSClient
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.createSTS
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.getCallerIdentity
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -80,7 +78,7 @@ private suspend fun attemptSSOLogin(profileName: String) {
 }
 
 private suspend fun getRoleCredentialsPossiblyLogin(
-    ssoClient: SSOClient,
+    sso: SSO,
     accountId: String,
     roleName: String,
     profileName: String
@@ -88,28 +86,28 @@ private suspend fun getRoleCredentialsPossiblyLogin(
     val accessToken = loadAccessToken()
     if (accessToken != null) {
         return try {
-            ssoClient.send(GetRoleCredentialsCommand(jso {
+            sso.getRoleCredentials {
                 this.accountId = accountId
                 this.roleName = roleName
                 this.accessToken = accessToken
-            }))
+            }
         } catch (err: UnauthorizedException) {
             attemptSSOLogin(profileName)
             val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
-            ssoClient.send(GetRoleCredentialsCommand(jso {
+            sso.getRoleCredentials {
                 this.accountId = accountId
                 this.roleName = roleName
                 this.accessToken = newAccessToken
-            }))
+            }
         }
     }
     attemptSSOLogin(profileName)
     val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
-    return ssoClient.send(GetRoleCredentialsCommand(jso {
+    return sso.getRoleCredentials {
         this.accountId = accountId
         this.roleName = roleName
         this.accessToken = newAccessToken
-    }))
+    }
 }
 
 fun main() = runScript {
@@ -121,8 +119,8 @@ fun main() = runScript {
         val region = ssoConfig["sso_region"]!!
         val accountId = ssoConfig["sso_account_id"]!!
         val roleName = ssoConfig["sso_role_name"]!!
-        createSSOClient(region = region, defaultsMode = "standard").use { ssoClient ->
-            val response = getRoleCredentialsPossiblyLogin(ssoClient, accountId, roleName, profile)
+        createSSO(region = region, defaultsMode = "standard").use { sso ->
+            val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
 
             response.roleCredentials?.let { roleCredentials ->
                 val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
@@ -132,7 +130,7 @@ fun main() = runScript {
                 println("AWS_DEFAULT_REGION=${ssoConfig["sso_region"]};")
                 println("export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;")
 
-                createSTSClient(
+                createSTS(
                     region = region,
                     defaultsMode = "standard",
                     credentialDefaultProvider = {
@@ -143,8 +141,8 @@ fun main() = runScript {
                             expirationDate
                         )
                     }
-                ).use { stsClient ->
-                    val callerIdentity = stsClient.send(GetCallerIdentityCommand(jso { }))
+                ).use { sts ->
+                    val callerIdentity = sts.getCallerIdentity { }
                     printlnStderr("As ${callerIdentity.arn} until $expirationDate")
                 }
             }
