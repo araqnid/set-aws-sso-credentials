@@ -1,40 +1,35 @@
 package org.araqnid.kotlin.setawsssocredentials
 
-import js.core.jso
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import node.buffer.BufferEncoding
+import node.events.Event
 import node.stream.Readable
-import node.stream.Writable
 
 fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flow<String> {
     return callbackFlow {
         setEncoding(encoding)
-        pipe(Writable(jso {
-            decodeStrings = false
-            write = { chunk, _, callback ->
-                val fastResult = trySend(chunk.unsafeCast<String>())
-                if (fastResult.isSuccess) {
-                    callback(null)
-                } else {
-                    launch {
-                        try {
-                            send(chunk.unsafeCast<String>())
-                            callback(null)
-                        } catch (err: Throwable) {
-                            callback(err.unsafeCast<Error>())
-                            throw err
-                        }
-                    }
-                }
+
+        on(Event.DATA) { chunk ->
+            val fastResult = trySend(chunk.unsafeCast<String>())
+            if (fastResult.isSuccess) return@on
+            pause()
+            launch {
+                send(chunk.unsafeCast<String>())
+                resume()
             }
-            final = { callback ->
-                close()
-                callback(null)
-            }
-        }))
+        }
+
+        on(Event.CLOSE) {
+            close()
+        }
+
+        on(Event.ERROR) { err ->
+            close(err)
+        }
+
         awaitClose {
             this@readTextChunks.destroy()
         }
