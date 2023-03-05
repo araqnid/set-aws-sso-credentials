@@ -3,14 +3,14 @@ package org.araqnid.kotlin.setawsssocredentials
 import js.core.jso
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import node.buffer.BufferEncoding
 import node.stream.Readable
 import node.stream.Writable
 
 fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flow<String> {
-    return channelFlow {
+    return callbackFlow {
         setEncoding(encoding)
         pipe(Writable(jso {
             decodeStrings = false
@@ -35,6 +35,8 @@ fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flo
                 callback(null)
             }
         }))
-        awaitClose()
+        awaitClose {
+            this@readTextChunks.destroy()
+        }
     }
 }
