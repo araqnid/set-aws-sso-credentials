@@ -9,13 +9,13 @@ import kotlin.js.Promise
 external interface STSClientConfig {
     var region: String?
     var defaultsMode: Any? // String | Promise<String>
-    var credentialDefaultProvider: Provider<Credentials>? // Provider<Credentials>
+    var credentialDefaultProvider: Provider<org.araqnid.kotlin.setawsssocredentials.aws.Credentials>? // Provider<Credentials>
 }
 
 external interface STSClientResolvedConfig {
     val region: () -> Promise<String>
     val defaultsMode: () -> Promise<String>
-    val credentialsDefaultProvider: Provider<Credentials>
+    val credentialsDefaultProvider: Provider<org.araqnid.kotlin.setawsssocredentials.aws.Credentials>
 }
 
 external interface STSServiceInput
