@@ -1,6 +1,6 @@
 package org.araqnid.kotlin.setawsssocredentials
 
-import js.core.Record
+import js.core.Object
 import js.core.get
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
@@ -148,14 +148,10 @@ fun main() = runScript {
             }
         }
     } else {
-        for ((name, value) in sharedConfig.configFile.entries) {
+        for ((name, value) in Object.entries(sharedConfig.configFile)) {
             if (value["sso_start_url"] != null) {
                 println(name)
             }
         }
     }
 }
-
-private val <K : Any, V : Any> Record<K, V>.entries: List<Pair<K, V>>
-    get() = js("Object.entries")(this@entries).unsafeCast<Array<Array<dynamic>>>()
-        .map { (key, value) -> Pair(key, value) }
