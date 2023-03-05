@@ -2,6 +2,7 @@ package org.araqnid.kotlin.setawsssocredentials
 
 import js.core.Record
 import js.core.get
+import js.core.jso
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -14,9 +15,10 @@ import node.os.EOL
 import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
+import org.araqnid.kotlin.setawsssocredentials.aws.send
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.GetCallerIdentityCommand
 import org.araqnid.kotlin.setawsssocredentials.aws.sts.createSTSClient
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.getCallerIdentity
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -86,28 +88,28 @@ private suspend fun getRoleCredentialsPossiblyLogin(
     val accessToken = loadAccessToken()
     if (accessToken != null) {
         return try {
-            ssoClient.getRoleCredentials(
-                accountId = accountId,
-                roleName = roleName,
-                accessToken = accessToken
-            )
+            ssoClient.send(GetRoleCredentialsCommand(jso {
+                this.accountId = accountId
+                this.roleName = roleName
+                this.accessToken = accessToken
+            }))
         } catch (err: UnauthorizedException) {
             attemptSSOLogin(profileName)
             val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
-            ssoClient.getRoleCredentials(
-                accountId = accountId,
-                roleName = roleName,
-                accessToken = newAccessToken
-            )
+            ssoClient.send(GetRoleCredentialsCommand(jso {
+                this.accountId = accountId
+                this.roleName = roleName
+                this.accessToken = newAccessToken
+            }))
         }
     }
     attemptSSOLogin(profileName)
     val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
-    return ssoClient.getRoleCredentials(
-        accountId = accountId,
-        roleName = roleName,
-        accessToken = newAccessToken
-    )
+    return ssoClient.send(GetRoleCredentialsCommand(jso {
+        this.accountId = accountId
+        this.roleName = roleName
+        this.accessToken = newAccessToken
+    }))
 }
 
 fun main() = runScript {
@@ -142,7 +144,7 @@ fun main() = runScript {
                         )
                     }
                 ).use { stsClient ->
-                    val callerIdentity = stsClient.getCallerIdentity()
+                    val callerIdentity = stsClient.send(GetCallerIdentityCommand(jso { }))
                     printlnStderr("As ${callerIdentity.arn} until $expirationDate")
                 }
             }
