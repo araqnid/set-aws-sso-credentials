@@ -1,8 +1,11 @@
+@file:Suppress("unused")
+
 package org.araqnid.kotlin.setawsssocredentials.aws
 
 import js.core.jso
 import kotlinx.coroutines.suspendCancellableCoroutine
 import web.abort.AbortController
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.js.Promise
@@ -37,16 +40,21 @@ external interface Client<ServiceInputTypes, ServiceOutputTypes, ResolvedClientC
     fun destroy()
 }
 
+typealias ClientCallback<O> = (Any?, O?) -> Unit
+
+internal fun <O> Continuation<O>.toClientCallback(): ClientCallback<O> =
+    { err, data ->
+        if (err != null)
+            resumeWithException(err.unsafeCast<Throwable>())
+        else
+            resume(data.unsafeCast<O>())
+    }
+
 suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.send(command: Command<CI, CO>): CO {
     return suspendCancellableCoroutine { cont ->
         val abortController = AbortController()
         cont.invokeOnCancellation(abortController::abort)
-        sendAsync(command, jso { abortSignal = abortController.signal }) { err, data ->
-            if (err != null)
-                cont.resumeWithException(err.unsafeCast<Throwable>())
-            else
-                cont.resume(data.unsafeCast<CO>())
-        }
+        sendAsync(command, jso { abortSignal = abortController.signal }, cont.toClientCallback())
     }
 }
 
