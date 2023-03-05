@@ -1,4 +1,5 @@
 @file:JsModule("@aws-sdk/client-sso")
+@file:Suppress("unused")
 
 package org.araqnid.kotlin.setawsssocredentials.aws.sso
 
