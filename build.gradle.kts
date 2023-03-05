@@ -1,7 +1,7 @@
 plugins {
     kotlin("js") version "1.8.10"
     kotlin("plugin.serialization") version "1.8.10"
-    id("nodejs-application")
+    id("org.araqnid.kotlin-nodejs-application") version "0.0.2"
 }
 
 repositories {
@@ -51,18 +51,24 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 }
 
+tasks {
+    register<Sync>("syncToDist") {
+        from(named("packageNodeJsDistributableWithNCC"))
+        into(project.layout.projectDirectory.dir("dist"))
+    }
+
+    named("assemble").configure {
+        dependsOn("syncToDist")
+    }
+}
+
 nodeJsApplication {
     v8cache.set(isPropertySet("nodejs.v8cache", valueIfNotSpecified = false))
     minify.set(isPropertySet("nodejs.minify", valueIfNotSpecified = true))
-    useNcc.set(properties["nodejs.package"] != "exploded")
-    moduleName.set("set-aws-sso-credentials-kotlin")
-    distDir.set(projectDir.resolve("dist"))
 }
 
 node {
-    val nodejsVersion = properties["nodejs.version"]
-    if (nodejsVersion is String) {
-        download.set(true)
-        version.set(nodejsVersion)
-    }
+    val nvmrc = providers.fileContents(layout.projectDirectory.file(".nvmrc")).asText.map { it.trim() }.orElse("")
+    version.set(nvmrc)
+    download.set(nvmrc.map { it.isNotEmpty() })
 }
