@@ -1,4 +1,5 @@
 @file:JsModule("@aws-sdk/client-sso")
+@file:Suppress("unused")
 
 package org.araqnid.kotlin.setawsssocredentials.aws.sso
 
@@ -26,7 +27,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
     /**
      * Returns the STS short-term credentials for a given role name that is assigned to the user.
      */
-    fun getRoleCredentials(
+    @JsName("getRoleCredentials")
+    fun getRoleCredentialsAsync(
         input: GetRoleCredentialsCommandInput,
         options: HttpHandlerOptions = definedExternally
     ): Promise<GetRoleCredentialsCommandOutput>
@@ -34,7 +36,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
     /**
      * Returns the STS short-term credentials for a given role name that is assigned to the user.
      */
-    fun getRoleCredentials(
+    @JsName("getRoleCredentials")
+    fun getRoleCredentialsAsync(
         input: GetRoleCredentialsCommandInput,
         cb: (err: Any?, data: GetRoleCredentialsCommandOutput?) -> Unit
     )
@@ -42,7 +45,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
     /**
      * Returns the STS short-term credentials for a given role name that is assigned to the user.
      */
-    fun getRoleCredentials(
+    @JsName("getRoleCredentials")
+    fun getRoleCredentialsAsync(
         input: GetRoleCredentialsCommandInput,
         options: HttpHandlerOptions,
         cb: (err: Any?, data: GetRoleCredentialsCommandOutput?) -> Unit
@@ -51,7 +55,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
     /**
      * Lists all roles that are assigned to the user for a given Amazon Web Services account.
      */
-    fun listAccountRoles(
+    @JsName("listAccountRoles")
+    fun listAccountRolesAsync(
         input: ListAccountRolesCommandInput,
         options: HttpHandlerOptions = definedExternally
     ): Promise<ListAccountRolesCommandOutput>
@@ -59,7 +64,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
     /**
      * Lists all roles that are assigned to the user for a given Amazon Web Services account.
      */
-    fun listAccountRoles(
+    @JsName("listAccountRoles")
+    fun listAccountRolesAsync(
         input: ListAccountRolesCommandInput,
         cb: (err: Any?, data: ListAccountRolesCommandOutput?) -> Unit
     )
@@ -67,7 +73,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
     /**
      * Lists all roles that are assigned to the user for a given Amazon Web Services account.
      */
-    fun listAccountRoles(
+    @JsName("listAccountRoles")
+    fun listAccountRolesAsync(
         input: ListAccountRolesCommandInput,
         options: HttpHandlerOptions,
         cb: (err: Any?, data: ListAccountRolesCommandOutput?) -> Unit
@@ -79,7 +86,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
      * in the _Amazon Web Services SSO User Guide_. This operation
      * returns a paginated response.
      */
-    fun listAccounts(
+    @JsName("listAccounts")
+    fun listAccountsAsync(
         input: ListAccountsCommandInput,
         options: HttpHandlerOptions = definedExternally
     ): Promise<ListAccountsCommandOutput>
@@ -90,7 +98,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
      * in the _Amazon Web Services SSO User Guide_. This operation
      * returns a paginated response.
      */
-    fun listAccounts(
+    @JsName("listAccounts")
+    fun listAccountsAsync(
         input: ListAccountsCommandInput,
         cb: (err: Any?, data: ListAccountRolesCommandOutput?) -> Unit
     )
@@ -101,7 +110,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
      * in the _Amazon Web Services SSO User Guide_. This operation
      * returns a paginated response.
      */
-    fun listAccounts(
+    @JsName("listAccounts")
+    fun listAccountsAsync(
         input: ListAccountsCommandInput,
         options: HttpHandlerOptions,
         cb: (err: Any?, data: ListAccountRolesCommandOutput?) -> Unit
@@ -122,7 +132,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
      * For more information, see [User authentications](https://docs.aws.amazon.com/singlesignon/latest/userguide/authconcept.html)
      * in the _Amazon Web Services SSO User Guide_.</p>
      */
-    fun logout(
+    @JsName("logout")
+    fun logoutAsync(
         input: LogoutCommandInput,
         options: HttpHandlerOptions = definedExternally
     ): Promise<LogoutCommandOutput>
@@ -142,7 +153,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
      * For more information, see [User authentications](https://docs.aws.amazon.com/singlesignon/latest/userguide/authconcept.html)
      * in the _Amazon Web Services SSO User Guide_.</p>
      */
-    fun logout(
+    @JsName("logout")
+    fun logoutAsync(
         input: LogoutCommandInput,
         cb: (err: Any?, data: ListAccountRolesCommandOutput?) -> Unit
     )
@@ -162,7 +174,8 @@ external class SSO(config: SSOClientConfig) : SSOClient {
      * For more information, see [User authentications](https://docs.aws.amazon.com/singlesignon/latest/userguide/authconcept.html)
      * in the _Amazon Web Services SSO User Guide_.</p>
      */
-    fun logout(
+    @JsName("logout")
+    fun logoutAsync(
         input: LogoutCommandInput,
         options: HttpHandlerOptions = definedExternally,
         cb: (err: Any?, data: ListAccountRolesCommandOutput?) -> Unit
