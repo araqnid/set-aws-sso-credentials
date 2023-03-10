@@ -187,7 +187,7 @@ private suspend fun assumeProfileDefaultRole(profile: String) {
 }
 
 private suspend fun assumeProfileSpecifiedRole(profile: String, targetRole: String, sessionName: String) {
-    withProfileDefaultRole(profile) { region, roleCredentials, sts ->
+    withProfileDefaultRole(profile) { region, _, sts ->
         val callerIdentity = sts.getCallerIdentity { }
         printlnStderr("Via ${callerIdentity.arn}")
         val assumed = sts.assumeRole {
