@@ -15,10 +15,7 @@ import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.Credentials
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.assumeRole
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.createSTS
-import org.araqnid.kotlin.setawsssocredentials.aws.sts.getCallerIdentity
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -150,7 +147,7 @@ private fun Credentials.toExportable(defaultRegion: String) = ExportableCredenti
     defaultRegion = defaultRegion
 )
 
-private suspend fun assumeProfileDefaultRole(profile: String) {
+private suspend fun withProfileDefaultRole(profile: String, block: suspend (region: String, roleCredentials: RoleCredentials, sts: STS) -> Unit) {
     val sharedConfig = loadSharedConfigFiles().await()
     val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
     val region = ssoConfig["sso_region"]!!
@@ -174,48 +171,32 @@ private suspend fun assumeProfileDefaultRole(profile: String) {
                     )
                 }
             ).use { sts ->
-                val callerIdentity = sts.getCallerIdentity { }
-                printlnStderr("As ${callerIdentity.arn} until $expirationDate")
-                export(roleCredentials.toExportable(region))
+                block(region, roleCredentials, sts)
             }
         }
     }
 }
 
-private suspend fun assumeProfileSpecifiedRole(profile: String, targetRole: String, sessionName: String) {
-    val sharedConfig = loadSharedConfigFiles().await()
-    val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
-    val region = ssoConfig["sso_region"]!!
-    val accountId = ssoConfig["sso_account_id"]!!
-    val roleName = ssoConfig["sso_role_name"]!!
-    createSSO(region = region, defaultsMode = "standard").use { sso ->
-        val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
+private suspend fun assumeProfileDefaultRole(profile: String) {
+    withProfileDefaultRole(profile) { region, roleCredentials, sts ->
+        val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
+        val callerIdentity = sts.getCallerIdentity { }
+        printlnStderr("As ${callerIdentity.arn} until $expirationDate")
+        export(roleCredentials.toExportable(region))
+    }
+}
 
-        response.roleCredentials?.let { roleCredentials ->
-            val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
-            createSTS(
-                region = region,
-                defaultsMode = "standard",
-                credentialDefaultProvider = {
-                    fixedCredentials(
-                        roleCredentials.accessKeyId!!,
-                        roleCredentials.secretAccessKey!!,
-                        roleCredentials.sessionToken,
-                        expirationDate
-                    )
-                }
-            ).use { sts ->
-                val callerIdentity = sts.getCallerIdentity { }
-                printlnStderr("Via ${callerIdentity.arn}")
-                val assumed = sts.assumeRole {
-                    this.roleArn = targetRole
-                    this.roleSessionName = sessionName
-                }
-                val secondExpirationDate = assumed.credentials!!.expiration
-                printlnStderr("As ${assumed.assumedRoleUser!!.arn} until $secondExpirationDate")
-                export(assumed.credentials!!.toExportable(region))
-            }
+private suspend fun assumeProfileSpecifiedRole(profile: String, targetRole: String, sessionName: String) {
+    withProfileDefaultRole(profile) { region, roleCredentials, sts ->
+        val callerIdentity = sts.getCallerIdentity { }
+        printlnStderr("Via ${callerIdentity.arn}")
+        val assumed = sts.assumeRole {
+            this.roleArn = targetRole
+            this.roleSessionName = sessionName
         }
+        val secondExpirationDate = assumed.credentials!!.expiration
+        printlnStderr("As ${assumed.assumedRoleUser!!.arn} until $secondExpirationDate")
+        export(assumed.credentials!!.toExportable(region))
     }
 }
 
