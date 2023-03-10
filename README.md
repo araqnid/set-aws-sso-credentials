@@ -22,14 +22,16 @@ SSO for you, and emit the shell fragment necessary to set the environment variab
 
 ## Tool invocation
 
-Syntax: `set-sso-credentials [profile-name]`
+Syntax: `set-sso-credentials [profile-name [target-role-arn session-name]]`
 
 If you run the tool with no arguments, it will simply list the profiles that have an `sso_start_url` associated with
 them.
 
 If you provide a profile name, it will get the SSO attributes for that profile and call SSO to get role credentials, and
-then
-write a shell fragment to set the role credentials in the environment.
+then write a shell fragment to set the role credentials in the environment.
+
+If you additionally provide a target role ARN and session name, it will use STS to further assume the target role. This
+will typically produce shorter-lived credentials.
 
 In this directory, run `./gradlew build` to compile the Kotlin and bundle with the libraries into the `dist` directory.
 
