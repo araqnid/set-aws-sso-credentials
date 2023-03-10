@@ -15,6 +15,8 @@ import node.process.process
 import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.Credentials
+import org.araqnid.kotlin.setawsssocredentials.aws.sts.assumeRole
 import org.araqnid.kotlin.setawsssocredentials.aws.sts.createSTS
 import org.araqnid.kotlin.setawsssocredentials.aws.sts.getCallerIdentity
 import org.araqnid.kotlin.setawsssocredentials.aws.use
@@ -110,48 +112,125 @@ private suspend fun getRoleCredentialsPossiblyLogin(
     }
 }
 
+private suspend fun listProfiles() {
+    val sharedConfig = loadSharedConfigFiles().await()
+    for ((name, value) in Object.entries(sharedConfig.configFile)) {
+        if (value["sso_start_url"] != null) {
+            println(name)
+        }
+    }
+}
+
+private data class ExportableCredentials(
+    val accessKeyId: String,
+    val secretAccessKey: String,
+    val sessionToken: String,
+    val defaultRegion: String
+)
+
+private fun export(credentials: ExportableCredentials) {
+    println("AWS_ACCESS_KEY_ID=${credentials.accessKeyId};")
+    println("AWS_SECRET_ACCESS_KEY=${credentials.secretAccessKey};")
+    println("AWS_SESSION_TOKEN=${credentials.sessionToken};")
+    println("AWS_DEFAULT_REGION=${credentials.defaultRegion};")
+    println("export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;")
+}
+
+private fun RoleCredentials.toExportable(defaultRegion: String) = ExportableCredentials(
+    accessKeyId = accessKeyId!!,
+    secretAccessKey = secretAccessKey!!,
+    sessionToken = sessionToken!!,
+    defaultRegion = defaultRegion
+)
+
+private fun Credentials.toExportable(defaultRegion: String) = ExportableCredentials(
+    accessKeyId = accessKeyId!!,
+    secretAccessKey = secretAccessKey!!,
+    sessionToken = sessionToken!!,
+    defaultRegion = defaultRegion
+)
+
+private suspend fun assumeProfileDefaultRole(profile: String) {
+    val sharedConfig = loadSharedConfigFiles().await()
+    val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
+    val region = ssoConfig["sso_region"]!!
+    val accountId = ssoConfig["sso_account_id"]!!
+    val roleName = ssoConfig["sso_role_name"]!!
+    createSSO(region = region, defaultsMode = "standard").use { sso ->
+        val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
+
+        response.roleCredentials?.let { roleCredentials ->
+            val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
+
+            createSTS(
+                region = region,
+                defaultsMode = "standard",
+                credentialDefaultProvider = {
+                    fixedCredentials(
+                        roleCredentials.accessKeyId!!,
+                        roleCredentials.secretAccessKey!!,
+                        roleCredentials.sessionToken,
+                        expirationDate
+                    )
+                }
+            ).use { sts ->
+                val callerIdentity = sts.getCallerIdentity { }
+                printlnStderr("As ${callerIdentity.arn} until $expirationDate")
+                export(roleCredentials.toExportable(region))
+            }
+        }
+    }
+}
+
+private suspend fun assumeProfileSpecifiedRole(profile: String, targetRole: String, sessionName: String) {
+    val sharedConfig = loadSharedConfigFiles().await()
+    val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
+    val region = ssoConfig["sso_region"]!!
+    val accountId = ssoConfig["sso_account_id"]!!
+    val roleName = ssoConfig["sso_role_name"]!!
+    createSSO(region = region, defaultsMode = "standard").use { sso ->
+        val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
+
+        response.roleCredentials?.let { roleCredentials ->
+            val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
+            createSTS(
+                region = region,
+                defaultsMode = "standard",
+                credentialDefaultProvider = {
+                    fixedCredentials(
+                        roleCredentials.accessKeyId!!,
+                        roleCredentials.secretAccessKey!!,
+                        roleCredentials.sessionToken,
+                        expirationDate
+                    )
+                }
+            ).use { sts ->
+                val callerIdentity = sts.getCallerIdentity { }
+                printlnStderr("Via ${callerIdentity.arn}")
+                val assumed = sts.assumeRole {
+                    this.roleArn = targetRole
+                    this.roleSessionName = sessionName
+                }
+                val secondExpirationDate = assumed.credentials!!.expiration
+                printlnStderr("As ${assumed.assumedRoleUser!!.arn} until $secondExpirationDate")
+                export(assumed.credentials!!.toExportable(region))
+            }
+        }
+    }
+}
+
 fun main() = runScript {
     val args = process.argv.drop(2)
-    val profile = if (args.isNotEmpty()) args[0] else null
-    val sharedConfig = loadSharedConfigFiles().await()
-    if (profile != null) {
-        val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
-        val region = ssoConfig["sso_region"]!!
-        val accountId = ssoConfig["sso_account_id"]!!
-        val roleName = ssoConfig["sso_role_name"]!!
-        createSSO(region = region, defaultsMode = "standard").use { sso ->
-            val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
-
-            response.roleCredentials?.let { roleCredentials ->
-                val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
-                println("AWS_ACCESS_KEY_ID=${roleCredentials.accessKeyId};")
-                println("AWS_SECRET_ACCESS_KEY=${roleCredentials.secretAccessKey};")
-                println("AWS_SESSION_TOKEN=${roleCredentials.sessionToken};")
-                println("AWS_DEFAULT_REGION=${ssoConfig["sso_region"]};")
-                println("export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_DEFAULT_REGION;")
-
-                createSTS(
-                    region = region,
-                    defaultsMode = "standard",
-                    credentialDefaultProvider = {
-                        fixedCredentials(
-                            roleCredentials.accessKeyId!!,
-                            roleCredentials.secretAccessKey!!,
-                            roleCredentials.sessionToken,
-                            expirationDate
-                        )
-                    }
-                ).use { sts ->
-                    val callerIdentity = sts.getCallerIdentity { }
-                    printlnStderr("As ${callerIdentity.arn} until $expirationDate")
-                }
-            }
-        }
-    } else {
-        for ((name, value) in Object.entries(sharedConfig.configFile)) {
-            if (value["sso_start_url"] != null) {
-                println(name)
-            }
-        }
+    when (args.size) {
+        0 -> listProfiles()
+        1 -> assumeProfileDefaultRole(args[0])
+        3 -> assumeProfileSpecifiedRole(args[0], args[1], args[2])
+        else -> error(
+            """
+            Syntax: ${process.argv.slice(0..1).joinToString(" ")}
+            Syntax: ${process.argv.slice(0..1).joinToString(" ")} profile-name
+            Syntax: ${process.argv.slice(0..1).joinToString(" ")} profile-name target-role session-name
+        """.trimIndent()
+        )
     }
 }
