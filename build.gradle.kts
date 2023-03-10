@@ -33,7 +33,7 @@ kotlin {
 dependencies {
     val kotlinxCoroutines = "1.6.4"
     val kotlinxSerialization = "1.5.0"
-    val kotlinWrappers = "1.0.0-pre.495"
+    val kotlinWrappers = "1.0.0-pre.510-compat"
 
     api(kotlin("stdlib-js"))
     implementation(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:$kotlinxCoroutines"))
