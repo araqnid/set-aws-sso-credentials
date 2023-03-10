@@ -57,7 +57,3 @@ Or simply use the convenience alias:
 ```sh
 profilename
 ```
-
-After setting the SSO credentials, the `aws_sso_profile` wrapper will run `aws sts get-caller-identity` to confirm the
-credentials that have been installed.
-
