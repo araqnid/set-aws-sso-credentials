@@ -1,7 +1,7 @@
 script="$1"
 
 aws_sso_profile() {
-    eval $( node "$script" "$1" )
+    eval $( node "$script" "$@" )
 }
 
 echo -n "AWS SSO aliases:"

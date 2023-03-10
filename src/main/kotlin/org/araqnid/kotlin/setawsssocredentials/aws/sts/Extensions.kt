@@ -48,3 +48,15 @@ suspend fun STS.getCallerIdentity(input: GetCallerIdentityCommandInput): GetCall
 suspend fun STS.getCallerIdentity(block: GetCallerIdentityCommandInput.() -> Unit): GetCallerIdentityCommandOutput {
     return getCallerIdentity(input = jso(block))
 }
+
+suspend fun STS.assumeRole(input: AssumeRoleCommandInput): AssumeRoleCommandOutput {
+    return suspendCancellableCoroutine {  cont ->
+        val abortController = AbortController()
+        cont.invokeOnCancellation(abortController::abort)
+        assumeRoleAsync(input, jso { abortSignal = abortController.signal }, cont.toClientCallback())
+    }
+}
+
+suspend fun STS.assumeRole(block: AssumeRoleCommandInput.() -> Unit): AssumeRoleCommandOutput {
+    return assumeRole(input = jso(block))
+}
