@@ -1,1 +1,1 @@
-rootProject.name = "set-aws-sso-credentials-kotlin"
+rootProject.name = "set-aws-sso-credentials"
