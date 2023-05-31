@@ -31,11 +31,11 @@ fun command(command: String, vararg args: String): Flow<CommandOutput> {
         val deferredExitCode = CompletableDeferred<Int>()
 
         val stdout = launch {
-            spawned.stdout.readTextChunks().extractLines().collect { send(CommandOutput.Stdout(it)) }
+            spawned.stdout!!.readTextChunks().extractLines().collect { send(CommandOutput.Stdout(it)) }
         }
 
         val stderr = launch {
-            spawned.stderr.readTextChunks().extractLines().collect { send(CommandOutput.Stderr(it)) }
+            spawned.stderr!!.readTextChunks().extractLines().collect { send(CommandOutput.Stderr(it)) }
         }
 
         spawned.on(Event.ERROR) { err: Throwable ->

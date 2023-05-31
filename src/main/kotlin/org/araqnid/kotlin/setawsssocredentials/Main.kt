@@ -1,10 +1,8 @@
 package org.araqnid.kotlin.setawsssocredentials
 
 import js.core.Object
-import js.core.get
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import node.WritableStream
 import node.buffer.BufferEncoding
