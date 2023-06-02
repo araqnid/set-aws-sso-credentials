@@ -1,17 +1,12 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
+import js.core.AsyncIterable
+import js.core.JsIterator
+import js.core.Symbol
 import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.*
-import kotlin.js.Promise
 
-external interface IteratorResult<out T> {
-    val value: T
-    val done: Boolean
-}
-
-external interface Paginator<out T> {
-    fun next(): Promise<IteratorResult<T>>
-}
+external interface Paginator<out T> : AsyncIterable<T>
 
 external interface PaginationConfiguration {
     val client: Client<*, *, *>?
@@ -22,10 +17,11 @@ external interface PaginationConfiguration {
 
 fun <T> Paginator<T>.asFlow(): Flow<T> {
     return flow {
+        val iterator = this@asFlow[Symbol.asyncIterator]()
         while (true) {
-            val result = next().await()
+            val result = iterator.next().await()
             if (result.done) break
-            emit(result.value)
+            emit(result.unsafeCast<JsIterator.YieldResult<T>>().value)
         }
     }
 }
