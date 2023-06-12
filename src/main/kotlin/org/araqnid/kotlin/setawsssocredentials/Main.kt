@@ -4,6 +4,7 @@ import js.core.Object
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import node.ErrnoException
 import node.WritableStream
 import node.buffer.BufferEncoding
 import node.events.Event
@@ -35,7 +36,7 @@ private suspend fun loadAccessToken(): String? {
         )
         return fileJson.accessToken
     } catch (err: Throwable) {
-        if (err.asDynamic().code == "ENOENT") {
+        if (err.unsafeCast<ErrnoException>().code == "ENOENT") {
             return null
         }
         throw err
