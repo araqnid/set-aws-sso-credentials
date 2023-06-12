@@ -8,10 +8,8 @@ repositories {
     mavenCentral()
 }
 
-fun isPropertySet(key: String, valueIfNotSpecified: Boolean = false): Boolean {
-    val value = project.properties[key]
-    return if (value is String) value.toBoolean() else valueIfNotSpecified
-}
+fun isPropertySet(key: String, valueIfNotSpecified: Boolean = false): Provider<Boolean> =
+    providers.gradleProperty(key).map { it.toBoolean() }.orElse(valueIfNotSpecified)
 
 kotlin {
     js(IR) {
@@ -22,9 +20,15 @@ kotlin {
             .matching { it.name == "productionExecutable" }
             .configureEach {
                 linkTask.configure {
-                    if (isPropertySet("kotlin.fullMemberNames")) {
-                        compilerOptions.freeCompilerArgs.add("-Xir-minimized-member-names=false")
-                    }
+                    compilerOptions.freeCompilerArgs.addAll(
+                        isPropertySet("kotlin.fullMemberNames").map { fullMemberNames ->
+                            println("populate compiler args from fullMemberNames=$fullMemberNames")
+                            if (fullMemberNames)
+                                listOf("-Xir-minimized-member-names=false")
+                            else
+                                emptyList()
+                        }
+                    )
                 }
             }
     }
