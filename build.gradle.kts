@@ -22,7 +22,6 @@ kotlin {
                 linkTask.configure {
                     compilerOptions.freeCompilerArgs.addAll(
                         isPropertySet("kotlin.fullMemberNames").map { fullMemberNames ->
-                            println("populate compiler args from fullMemberNames=$fullMemberNames")
                             if (fullMemberNames)
                                 listOf("-Xir-minimized-member-names=false")
                             else
