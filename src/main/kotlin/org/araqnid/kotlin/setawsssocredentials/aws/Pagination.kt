@@ -1,8 +1,8 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
 import js.core.AsyncIterable
-import js.core.JsIterator
 import js.core.Symbol
+import js.core.asYieldOrNull
 import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.*
 
@@ -20,8 +20,8 @@ fun <T> Paginator<T>.asFlow(): Flow<T> {
         val iterator = this@asFlow[Symbol.asyncIterator]()
         while (true) {
             val result = iterator.next().await()
-            if (result.done) break
-            emit(result.unsafeCast<JsIterator.YieldResult<T>>().value)
+            val yielded = result.asYieldOrNull() ?: break
+            emit(yielded.value)
         }
     }
 }
