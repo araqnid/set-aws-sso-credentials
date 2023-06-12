@@ -57,7 +57,7 @@ dependencies {
 tasks {
     register<Sync>("syncToDist") {
         from(named("packageNodeJsDistributableWithNCC"))
-        into(project.layout.projectDirectory.dir("dist"))
+        into(layout.projectDirectory.dir("dist"))
     }
 
     named("assemble").configure {
