@@ -4,6 +4,8 @@ aws_sso_profile() {
     eval $( node "$script" "$@" )
 }
 
+definitionsfile=$( mktemp )
+
 echo -n "AWS SSO aliases:"
 
 node "$script" | while read profile; do
@@ -11,8 +13,10 @@ node "$script" | while read profile; do
     true
   else
     echo -n " $profile"
-    eval "alias $profile='aws_sso_profile $profile'"
+    echo "$profile() { aws_sso_profile $profile; }" >> "$definitionsfile"
   fi
 done
+
+. "$definitionsfile"
 
 echo "."
