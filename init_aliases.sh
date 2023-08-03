@@ -19,4 +19,6 @@ done
 
 . "$definitionsfile"
 
+rm "$definitionsfile"
+
 echo "."
