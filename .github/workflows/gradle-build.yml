@@ -23,7 +23,7 @@ jobs:
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          cache-read-only: ${{ github.ref != 'refs/heads/kotlin' }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           arguments: build
       - name: Upload artifact
         uses: actions/upload-artifact@v3
