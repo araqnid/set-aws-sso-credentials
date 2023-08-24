@@ -13,7 +13,7 @@ node "$script" | while read profile; do
     true
   else
     echo -n " $profile"
-    echo "$profile() { aws_sso_profile $profile; }" >> "$definitionsfile"
+    echo "$profile() { aws_sso_profile $profile \"\$@\"; }" >> "$definitionsfile"
   fi
 done
 
