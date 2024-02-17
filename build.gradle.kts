@@ -34,7 +34,7 @@ kotlin {
 }
 
 dependencies {
-    val kotlinxCoroutines = "1.7.3"
+    val kotlinxCoroutines = "1.8.0"
     val kotlinxSerialization = "1.5.1"
     val kotlinWrappers = "1.0.0-pre.565"
 
