@@ -2,7 +2,7 @@
 
 package org.araqnid.kotlin.setawsssocredentials.aws
 
-import js.core.jso
+import js.objects.jso
 import kotlinx.coroutines.suspendCancellableCoroutine
 import web.abort.AbortController
 import kotlin.coroutines.Continuation
@@ -53,7 +53,7 @@ internal fun <O> Continuation<O>.toClientCallback(): ClientCallback<O> =
 suspend fun <I, O, CI : I, CO : O> Client<I, O, *>.send(command: Command<CI, CO>): CO {
     return suspendCancellableCoroutine { cont ->
         val abortController = AbortController()
-        cont.invokeOnCancellation(abortController::abort)
+        cont.invokeOnCancellation { abortController.abort() }
         sendAsync(command, jso { abortSignal = abortController.signal }, cont.toClientCallback())
     }
 }

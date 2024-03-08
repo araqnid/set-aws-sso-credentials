@@ -2,7 +2,7 @@
 
 package org.araqnid.kotlin.setawsssocredentials.aws.sso
 
-import js.core.jso
+import js.objects.jso
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.araqnid.kotlin.setawsssocredentials.aws.toClientCallback
 import web.abort.AbortController
@@ -24,7 +24,7 @@ fun createSSO(region: String? = null, defaultsMode: String? = null): SSO {
 suspend fun SSO.getRoleCredentials(input: GetRoleCredentialsCommandInput): GetRoleCredentialsCommandOutput {
     return suspendCancellableCoroutine { cont ->
         val abortController = AbortController()
-        cont.invokeOnCancellation(abortController::abort)
+        cont.invokeOnCancellation { abortController.abort() }
         getRoleCredentialsAsync(input, jso { abortSignal = abortController.signal }, cont.toClientCallback())
     }
 }

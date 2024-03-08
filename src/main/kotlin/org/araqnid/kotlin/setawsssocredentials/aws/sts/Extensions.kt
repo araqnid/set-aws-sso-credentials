@@ -2,7 +2,7 @@
 
 package org.araqnid.kotlin.setawsssocredentials.aws.sts
 
-import js.core.jso
+import js.objects.jso
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.araqnid.kotlin.setawsssocredentials.aws.Credentials
 import org.araqnid.kotlin.setawsssocredentials.aws.toClientCallback
@@ -40,7 +40,7 @@ fun createSTS(
 suspend fun STS.getCallerIdentity(input: GetCallerIdentityCommandInput): GetCallerIdentityCommandOutput {
     return suspendCancellableCoroutine { cont ->
         val abortController = AbortController()
-        cont.invokeOnCancellation(abortController::abort)
+        cont.invokeOnCancellation { abortController.abort() }
         getCallerIdentityAsync(input, jso { abortSignal = abortController.signal }, cont.toClientCallback())
     }
 }
@@ -52,7 +52,7 @@ suspend fun STS.getCallerIdentity(block: GetCallerIdentityCommandInput.() -> Uni
 suspend fun STS.assumeRole(input: AssumeRoleCommandInput): AssumeRoleCommandOutput {
     return suspendCancellableCoroutine {  cont ->
         val abortController = AbortController()
-        cont.invokeOnCancellation(abortController::abort)
+        cont.invokeOnCancellation { abortController.abort() }
         assumeRoleAsync(input, jso { abortSignal = abortController.signal }, cont.toClientCallback())
     }
 }

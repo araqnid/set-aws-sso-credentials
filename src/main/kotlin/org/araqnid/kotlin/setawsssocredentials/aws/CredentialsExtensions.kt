@@ -1,6 +1,6 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
-import js.core.jso
+import js.objects.jso
 import kotlin.js.Date
 
 fun fixedCredentials(accessKeyId: String, secretAccessKey: String, sessionToken: String? = null, expiration: Date? = null): Credentials {

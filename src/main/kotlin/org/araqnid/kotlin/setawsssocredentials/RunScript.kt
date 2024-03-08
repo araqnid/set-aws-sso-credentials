@@ -4,8 +4,8 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import node.events.Event
 import node.os.EOL
+import node.process.ProcessEvent
 import node.process.process
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
@@ -16,7 +16,7 @@ fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend C
     val job = Job(parent = context[Job])
     val scope = CoroutineScope(Dispatchers.Default + context + job)
 
-    process.on(Event.EXIT) {
+    process.on(ProcessEvent.EXIT) {
         if (job.isCompleted) return@on
 
         console.error(buildString {
@@ -46,7 +46,7 @@ fun runScript(context: CoroutineContext = EmptyCoroutineContext, body: suspend C
     job.invokeOnCompletion { ex ->
         if (ex != null) {
             console.error("Fatal error", ex)
-            process.exitCode = 1
+            process.exitCode = 1.0
         }
     }
 

@@ -1,9 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials.aws
 
-import js.core.AsyncIterable
-import js.core.Symbol
-import js.core.asYieldOrNull
-import kotlinx.coroutines.await
+import js.iterable.AsyncIterable
+import js.symbol.Symbol
 import kotlinx.coroutines.flow.*
 
 external interface Paginator<out T> : AsyncIterable<T>
@@ -17,11 +15,8 @@ external interface PaginationConfiguration {
 
 fun <T> Paginator<T>.asFlow(): Flow<T> {
     return flow {
-        val iterator = this@asFlow[Symbol.asyncIterator]()
-        while (true) {
-            val result = iterator.next().await()
-            val yielded = result.asYieldOrNull() ?: break
-            emit(yielded.value)
+        for (value in this@asFlow[Symbol.asyncIterator]()) {
+            emit(value)
         }
     }
 }

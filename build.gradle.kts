@@ -1,6 +1,6 @@
 plugins {
-    kotlin("js") version "1.9.0"
-    kotlin("plugin.serialization") version "1.9.0"
+    kotlin("js") version "1.9.23"
+    kotlin("plugin.serialization") version "1.9.23"
     id("org.araqnid.kotlin-nodejs-application") version "0.0.4"
 }
 
@@ -34,9 +34,9 @@ kotlin {
 }
 
 dependencies {
-    val kotlinxCoroutines = "1.7.3"
-    val kotlinxSerialization = "1.5.1"
-    val kotlinWrappers = "1.0.0-pre.565"
+    val kotlinxCoroutines = "1.8.0"
+    val kotlinxSerialization = "1.6.3"
+    val kotlinWrappers = "1.0.0-pre.710"
 
     api(kotlin("stdlib-js"))
     implementation(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:$kotlinxCoroutines"))

@@ -1,12 +1,13 @@
 package org.araqnid.kotlin.setawsssocredentials
 
-import js.core.jso
+import js.objects.jso
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import node.events.Event
+import node.childProcess.ChildProcessEvent
+import node.process.Signals
 import org.araqnid.kotlin.setawsssocredentials.childProcess.spawn
 
 sealed interface CommandOutput {
@@ -38,11 +39,11 @@ fun command(command: String, vararg args: String): Flow<CommandOutput> {
             spawned.stderr!!.readTextChunks().extractLines().collect { send(CommandOutput.Stderr(it)) }
         }
 
-        spawned.on(Event.ERROR) { err: Throwable ->
+        spawned.on(ChildProcessEvent.ERROR) { err: Throwable ->
             close(err)
         }
 
-        spawned.on(Event.CLOSE) { exitCode: Int ->
+        spawned.on(ChildProcessEvent.CLOSE) { exitCode: Int ->
             deferredExitCode.complete(exitCode)
         }
 
@@ -54,7 +55,7 @@ fun command(command: String, vararg args: String): Flow<CommandOutput> {
         }
 
         awaitClose {
-            spawned.kill()
+            spawned.kill(Signals.SIGTERM)
         }
     }
 }

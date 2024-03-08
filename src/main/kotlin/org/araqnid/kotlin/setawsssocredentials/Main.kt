@@ -1,16 +1,16 @@
 package org.araqnid.kotlin.setawsssocredentials
 
-import js.core.Object
+import js.objects.Object
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import node.ErrnoException
 import node.WritableStream
 import node.buffer.BufferEncoding
-import node.events.Event
 import node.fs.readFile
 import node.os.EOL
 import node.process.process
+import node.stream.WritableEvent
 import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
@@ -48,7 +48,7 @@ private suspend fun WritableStream.writeFully(str: String) {
         if (write(str)) {
             cont.resume(Unit)
         } else {
-            once(Event.DRAIN) {
+            once(WritableEvent.DRAIN) {
                 cont.resume(Unit)
             }
         }
@@ -146,7 +146,10 @@ private fun Credentials.toExportable(defaultRegion: String) = ExportableCredenti
     defaultRegion = defaultRegion
 )
 
-private suspend fun withProfileDefaultRole(profile: String, block: suspend (region: String, roleCredentials: RoleCredentials, sts: STS) -> Unit) {
+private suspend fun withProfileDefaultRole(
+    profile: String,
+    block: suspend (region: String, roleCredentials: RoleCredentials, sts: STS) -> Unit
+) {
     val sharedConfig = loadSharedConfigFiles().await()
     val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
     val region = ssoConfig["sso_region"]!!

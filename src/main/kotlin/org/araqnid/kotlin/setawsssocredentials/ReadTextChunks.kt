@@ -5,14 +5,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import node.buffer.BufferEncoding
-import node.events.Event
 import node.stream.Readable
+import node.stream.ReadableEvent
 
 fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flow<String> {
     return callbackFlow {
         setEncoding(encoding)
 
-        on(Event.DATA) { chunk ->
+        on(ReadableEvent.DATA) { chunk ->
             val fastResult = trySend(chunk.unsafeCast<String>())
             if (fastResult.isSuccess) return@on
             pause()
@@ -22,11 +22,11 @@ fun Readable.readTextChunks(encoding: BufferEncoding = BufferEncoding.utf8): Flo
             }
         }
 
-        on(Event.CLOSE) {
+        on(ReadableEvent.CLOSE) {
             close()
         }
 
-        on(Event.ERROR) { err ->
+        on(ReadableEvent.ERROR) { err ->
             close(err)
         }
 
