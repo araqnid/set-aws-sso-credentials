@@ -35,7 +35,7 @@ kotlin {
 
 dependencies {
     val kotlinxCoroutines = "1.8.0"
-    val kotlinxSerialization = "1.6.3"
+    val kotlinxSerialization = "1.7.1"
     val kotlinWrappers = "1.0.0-pre.710"
 
     api(kotlin("stdlib-js"))
