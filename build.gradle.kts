@@ -1,7 +1,7 @@
 plugins {
     kotlin("js") version "1.9.23"
     kotlin("plugin.serialization") version "1.9.23"
-    id("org.araqnid.kotlin-nodejs-application") version "0.0.4"
+    id("org.araqnid.kotlin-nodejs-application") version "0.1.0"
 }
 
 repositories {
