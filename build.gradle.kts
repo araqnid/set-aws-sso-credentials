@@ -1,7 +1,7 @@
 plugins {
-    kotlin("js") version "1.9.23"
-    kotlin("plugin.serialization") version "1.9.23"
-    id("org.araqnid.kotlin-nodejs-application") version "0.0.4"
+    kotlin("multiplatform") version "2.2.21"
+    kotlin("plugin.serialization") version "2.2.21"
+    id("org.araqnid.kotlin-nodejs-application") version "0.1.0"
 }
 
 repositories {
@@ -12,7 +12,7 @@ fun isPropertySet(key: String, valueIfNotSpecified: Boolean = false): Provider<B
     providers.gradleProperty(key).map { it.toBoolean() }.orElse(valueIfNotSpecified)
 
 kotlin {
-    js(IR) {
+    js {
         nodejs()
         useCommonJs()
         binaries.executable()
@@ -34,24 +34,24 @@ kotlin {
 }
 
 dependencies {
-    val kotlinxCoroutines = "1.8.0"
-    val kotlinxSerialization = "1.6.3"
+    val kotlinxCoroutines = "1.10.2"
+    val kotlinxSerialization = "1.9.0"
     val kotlinWrappers = "1.0.0-pre.710"
 
-    api(kotlin("stdlib-js"))
-    implementation(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:$kotlinxCoroutines"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    implementation(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:$kotlinxSerialization"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
-    implementation(platform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappers"))
-    implementation("org.jetbrains.kotlin-wrappers:kotlin-node")
-    implementation(npm("@aws-sdk/client-sso", "^3.279.0"))
-    implementation(npm("@aws-sdk/client-sts", "^3.279.0"))
-    implementation(npm("@aws-sdk/shared-ini-file-loader", "^3.272.0"))
+    "jsMainApi"(kotlin("stdlib-js"))
+    "jsMainImplementation"(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:$kotlinxCoroutines"))
+    "jsMainImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    "jsMainImplementation"(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:$kotlinxSerialization"))
+    "jsMainImplementation"("org.jetbrains.kotlinx:kotlinx-serialization-json")
+    "jsMainImplementation"(platform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappers"))
+    "jsMainImplementation"("org.jetbrains.kotlin-wrappers:kotlin-node")
+    "jsMainImplementation"(npm("@aws-sdk/client-sso", "^3.279.0"))
+    "jsMainImplementation"(npm("@aws-sdk/client-sts", "^3.279.0"))
+    "jsMainImplementation"(npm("@aws-sdk/shared-ini-file-loader", "^3.272.0"))
 
-    testImplementation(kotlin("test-js"))
-    testImplementation("org.araqnid.kotlin.assert-that:assert-that:0.1.1")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+    "jsTestImplementation"(kotlin("test-js"))
+    "jsTestImplementation"("org.araqnid.kotlin.assert-that:assert-that:0.1.1")
+    "jsTestImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 }
 
 tasks {
