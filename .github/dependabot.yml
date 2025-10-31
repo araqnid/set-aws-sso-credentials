@@ -18,6 +18,10 @@ updates:
       timezone: Europe/London
     ignore:
       - dependency-name: org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom
+    groups:
+      github:
+        patterns:
+          - 'actions/*'
 
   - package-ecosystem: "npm"
     directory: "/kotlin-js-store"
