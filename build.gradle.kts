@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("multiplatform") version (libs.versions.kotlin)
+    kotlin("plugin.serialization") version (libs.versions.kotlin)
     id("org.araqnid.kotlin-nodejs-application") version "0.1.0"
 }
 
@@ -34,20 +34,15 @@ kotlin {
 }
 
 dependencies {
-    val kotlinxCoroutines = "1.10.2"
-    val kotlinxSerialization = "1.9.0"
-    val kotlinWrappers = "1.0.0-pre.710"
-
     "jsMainApi"(kotlin("stdlib-js"))
-    "jsMainImplementation"(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:$kotlinxCoroutines"))
+    "jsMainImplementation"(platform(libs.coroutines.bom))
     "jsMainImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    "jsMainImplementation"(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:$kotlinxSerialization"))
+    "jsMainImplementation"(platform(libs.serialization.bom))
     "jsMainImplementation"("org.jetbrains.kotlinx:kotlinx-serialization-json")
-    "jsMainImplementation"(platform("org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom:$kotlinWrappers"))
+    "jsMainImplementation"(platform(libs.jswrappers.bom))
     "jsMainImplementation"("org.jetbrains.kotlin-wrappers:kotlin-node")
-    "jsMainImplementation"(npm("@aws-sdk/client-sso", "^3.279.0"))
-    "jsMainImplementation"(npm("@aws-sdk/client-sts", "^3.279.0"))
-    "jsMainImplementation"(npm("@aws-sdk/shared-ini-file-loader", "^3.272.0"))
+    "jsMainImplementation"(npm("@aws-sdk/client-sso", "^${libs.versions.aws.sdk.get()}"))
+    "jsMainImplementation"(npm("@aws-sdk/client-sts", "^${libs.versions.aws.sdk.get()}"))
 
     "jsTestImplementation"(kotlin("test-js"))
     "jsTestImplementation"("org.araqnid.kotlin.assert-that:assert-that:0.1.1")

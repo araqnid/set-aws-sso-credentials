@@ -1,4 +1,4 @@
-@file:JsModule("@aws-sdk/shared-ini-file-loader")
+@file:JsModule("@smithy/shared-ini-file-loader")
 @file:Suppress("unused")
 
 package org.araqnid.kotlin.setawsssocredentials.aws
