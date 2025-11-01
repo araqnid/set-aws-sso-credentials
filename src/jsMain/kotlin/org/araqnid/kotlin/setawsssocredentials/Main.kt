@@ -89,7 +89,7 @@ private suspend fun getRoleCredentialsPossiblyLogin(
                 this.roleName = roleName
                 this.accessToken = accessToken
             }
-        } catch (err: UnauthorizedException) {
+        } catch (_: UnauthorizedException) {
             attemptSSOLogin(profileName)
             val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
             sso.getRoleCredentials {
@@ -151,10 +151,12 @@ private suspend fun withProfileDefaultRole(
     block: suspend (region: String, roleCredentials: RoleCredentials, sts: STS) -> Unit
 ) {
     val sharedConfig = loadSharedConfigFiles().await()
-    val ssoConfig = sharedConfig.configFile[profile] ?: error("No such profile in \$HOME/.aws/config: $profile")
-    val region = ssoConfig["sso_region"]!!
-    val accountId = ssoConfig["sso_account_id"]!!
-    val roleName = ssoConfig["sso_role_name"]!!
+    val ssoConfig = sharedConfig.configFile[profile] ?: error($$"No such profile in $HOME/.aws/config: $$profile")
+    val region = ssoConfig["sso_region"]
+    val accountId = ssoConfig["sso_account_id"]
+    val roleName = ssoConfig["sso_role_name"]
+    if (region == null || accountId == null || roleName == null)
+        error("Profile \"$profile\" is not configured for SSO")
     createSSO(region = region, defaultsMode = "standard").use { sso ->
         val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
 
