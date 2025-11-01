@@ -22,11 +22,3 @@ updates:
       timezone: Europe/London
     ignore:
       - dependency-name: org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom
-
-  - package-ecosystem: "npm"
-    directory: "/kotlin-js-store"
-    schedule:
-      interval: weekly
-      day: saturday
-      time: "07:00"
-      timezone: Europe/London
