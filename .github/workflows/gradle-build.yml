@@ -20,7 +20,7 @@ jobs:
           node-version-file: '.nvmrc'
       - name: Clear build properties
         run: rm -fv gradle.properties
-      - name: Build
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
