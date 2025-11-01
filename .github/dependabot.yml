@@ -8,6 +8,10 @@ updates:
       day: saturday
       time: "07:00"
       timezone: Europe/London
+    groups:
+      github:
+        patterns:
+          - 'actions/*'
 
   - package-ecosystem: "gradle"
     directory: "/"
@@ -18,10 +22,6 @@ updates:
       timezone: Europe/London
     ignore:
       - dependency-name: org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom
-    groups:
-      github:
-        patterns:
-          - 'actions/*'
 
   - package-ecosystem: "npm"
     directory: "/kotlin-js-store"
