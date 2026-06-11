@@ -111,7 +111,10 @@ private suspend fun getRoleCredentialsPossiblyLogin(
 private suspend fun listProfiles() {
     val sharedConfig = loadSharedConfigFiles().await()
     for ((name, value) in Object.entries(sharedConfig.configFile)) {
-        if (value["sso_start_url"] != null) {
+        if (value["sso_session"] != null) {
+            println(name)
+        }
+        else if (value["sso_start_url"] != null && !name.startsWith("sso-session.")) {
             println(name)
         }
     }
