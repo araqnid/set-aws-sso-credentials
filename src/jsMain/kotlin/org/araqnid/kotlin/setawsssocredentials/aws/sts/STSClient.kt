@@ -3,19 +3,22 @@
 
 package org.araqnid.kotlin.setawsssocredentials.aws.sts
 
-import org.araqnid.kotlin.setawsssocredentials.aws.*
+import org.araqnid.kotlin.setawsssocredentials.aws.AwsCredentialIdentityProvider
+import org.araqnid.kotlin.setawsssocredentials.aws.Client
+import org.araqnid.kotlin.setawsssocredentials.aws.Command
+import org.araqnid.kotlin.setawsssocredentials.aws.HttpHandlerOptions
 import kotlin.js.Promise
 
 external interface STSClientConfig {
     var region: String?
     var defaultsMode: Any? // String | Promise<String>
-    var credentialDefaultProvider: Provider<org.araqnid.kotlin.setawsssocredentials.aws.Credentials>? // Provider<Credentials>
+    var credentialDefaultProvider: AwsCredentialIdentityProvider?
 }
 
 external interface STSClientResolvedConfig {
     val region: () -> Promise<String>
     val defaultsMode: () -> Promise<String>
-    val credentialsDefaultProvider: Provider<org.araqnid.kotlin.setawsssocredentials.aws.Credentials>
+    val credentialsDefaultProvider: AwsCredentialIdentityProvider
 }
 
 external interface STSServiceInput

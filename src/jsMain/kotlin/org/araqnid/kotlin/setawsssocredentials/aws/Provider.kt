@@ -9,12 +9,14 @@ import kotlin.js.Promise
 
 typealias Provider<T> = () -> Promise<T>
 
-typealias ProvideCredentials = (suspend () -> Credentials)
+typealias AwsCredentialIdentityProvider = Provider<AwsCredentialIdentity>
 
-fun ProvideCredentials.toCredentialsProvider(): Provider<Credentials> {
+typealias ProvideCredentials = (suspend () -> AwsCredentialIdentity)
+
+fun ProvideCredentials.toCredentialsProvider(): Provider<AwsCredentialIdentity> {
     return {
         Promise { resolve, reject ->
-            val block: suspend () -> Credentials = this@toCredentialsProvider
+            val block: suspend () -> AwsCredentialIdentity = this@toCredentialsProvider
             block.startCoroutine(Continuation(EmptyCoroutineContext) { result ->
                 result.fold(
                     { resolve(it) },

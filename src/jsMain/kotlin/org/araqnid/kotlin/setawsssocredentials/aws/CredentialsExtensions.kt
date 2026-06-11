@@ -3,7 +3,12 @@ package org.araqnid.kotlin.setawsssocredentials.aws
 import js.objects.jso
 import kotlin.js.Date
 
-fun fixedCredentials(accessKeyId: String, secretAccessKey: String, sessionToken: String? = null, expiration: Date? = null): Credentials {
+fun fixedCredentials(
+    accessKeyId: String,
+    secretAccessKey: String,
+    sessionToken: String? = null,
+    expiration: Date? = null
+): AwsCredentialIdentity {
     return jso<MutableCredentials> {
        this.accessKeyId = accessKeyId
        this.secretAccessKey = secretAccessKey
@@ -12,7 +17,7 @@ fun fixedCredentials(accessKeyId: String, secretAccessKey: String, sessionToken:
     }
 }
 
-external interface MutableCredentials : Credentials {
+external interface MutableCredentials : AwsCredentialIdentity {
     override var accessKeyId: String
     override var secretAccessKey: String
     override var sessionToken: String?

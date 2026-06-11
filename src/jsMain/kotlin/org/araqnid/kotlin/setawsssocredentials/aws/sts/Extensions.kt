@@ -4,12 +4,12 @@ package org.araqnid.kotlin.setawsssocredentials.aws.sts
 
 import js.objects.jso
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.araqnid.kotlin.setawsssocredentials.aws.Credentials
+import org.araqnid.kotlin.setawsssocredentials.aws.AwsCredentialIdentity
 import org.araqnid.kotlin.setawsssocredentials.aws.toClientCallback
 import org.araqnid.kotlin.setawsssocredentials.aws.toCredentialsProvider
 import web.abort.AbortController
 
-typealias ProvideCredentials = (suspend () -> Credentials)
+typealias ProvideCredentials = (suspend () -> AwsCredentialIdentity)
 
 fun createSTSClient(
     region: String? = null,
