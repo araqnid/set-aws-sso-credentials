@@ -209,7 +209,7 @@ private suspend fun withProfileDefaultRole(
             createSTS(
                 region = ssoProfileConfig.region,
                 defaultsMode = "standard",
-                credentialDefaultProvider = {
+                credentialsProvider = {
                     fixedCredentials(
                         roleCredentials.accessKeyId!!,
                         roleCredentials.secretAccessKey!!,

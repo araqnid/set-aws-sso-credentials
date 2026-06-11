@@ -14,26 +14,26 @@ typealias ProvideCredentials = (suspend () -> AwsCredentialIdentity)
 fun createSTSClient(
     region: String? = null,
     defaultsMode: String? = null,
-    credentialDefaultProvider: ProvideCredentials? = null
+    credentialsProvider: ProvideCredentials? = null
 ): STSClient {
     return STSClient(jso {
         if (region != null) this.region = region
         if (defaultsMode != null) this.defaultsMode = defaultsMode
-        if (credentialDefaultProvider != null) this.credentialDefaultProvider =
-            credentialDefaultProvider.toCredentialsProvider()
+        if (credentialsProvider != null) this.credentials =
+            credentialsProvider.toCredentialsProvider()
     })
 }
 
 fun createSTS(
     region: String? = null,
     defaultsMode: String? = null,
-    credentialDefaultProvider: ProvideCredentials? = null
+    credentialsProvider: ProvideCredentials? = null
 ): STS {
     return STS(jso {
         if (region != null) this.region = region
         if (defaultsMode != null) this.defaultsMode = defaultsMode
-        if (credentialDefaultProvider != null) this.credentialDefaultProvider =
-            credentialDefaultProvider.toCredentialsProvider()
+        if (credentialsProvider != null) this.credentials =
+            credentialsProvider.toCredentialsProvider()
     })
 }
 
