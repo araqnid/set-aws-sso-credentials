@@ -77,7 +77,7 @@ private suspend fun WritableStream.writeFully(str: String) {
 }
 
 private suspend fun printlnStderr(str: String) {
-    process.stderr.unsafeCast<WritableStream>().writeFully(str + EOL)
+    process.stderr.writeFully(str + EOL)
 }
 
 private suspend fun attemptSSOLogin(profileName: String) {
