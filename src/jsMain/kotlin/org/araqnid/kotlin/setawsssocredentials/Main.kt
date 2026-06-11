@@ -1,6 +1,7 @@
 package org.araqnid.kotlin.setawsssocredentials
 
 import js.objects.Object
+import js.objects.jso
 import kotlinx.coroutines.await
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.Serializable
@@ -20,6 +21,7 @@ import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.js.Date
 import kotlin.time.toKotlinInstant
+import org.araqnid.kotlin.setawsssocredentials.aws.fromSso as getSsoTokenProvider
 
 @Serializable
 private data class CredentialsCacheFile(val accessToken: String)
@@ -28,9 +30,22 @@ private val json = Json { ignoreUnknownKeys = true }
 
 private val ssoCacheDir = "${process.env["HOME"]}/.aws/sso/cache"
 
-private data class SSOProfileConfig(val sessionName: String?, val startUrl: String, val region: String)
+private data class SSOProfileConfig(
+    val profileName: String,
+    val sessionName: String?,
+    val startUrl: String,
+    val region: String
+)
 
 private suspend fun loadAccessToken(ssoProfileConfig: SSOProfileConfig): String? {
+    if (ssoProfileConfig.sessionName != null) {
+        val tokenProvider = getSsoTokenProvider(jso {
+            profile = ssoProfileConfig.profileName
+        })
+        val tokenIdentity = tokenProvider().await()
+        printlnStderr("SSO token expires at ${tokenIdentity.expiration?.toKotlinInstant()}")
+        return tokenIdentity.token
+    }
     try {
         val cacheKey = sha1(ssoProfileConfig.sessionName ?: ssoProfileConfig.startUrl)
         val credentialsCacheFile = "$ssoCacheDir/${cacheKey}.json"
@@ -167,6 +182,7 @@ private suspend fun withProfileDefaultRole(
             val sessionSection = sharedConfig.configFile["sso-session.${ssoSession}"]
                 ?: error("Profile \"$profile\" refers to unknown SSO session \"$ssoSession\"")
             SSOProfileConfig(
+                profileName = profile,
                 sessionName = ssoSession,
                 region = sessionSection["sso_region"] ?: error("SSO session \"$ssoSession\" does not have sso_region"),
                 startUrl = sessionSection["sso_start_url"]
@@ -174,6 +190,7 @@ private suspend fun withProfileDefaultRole(
             )
         } else {
             SSOProfileConfig(
+                profileName = profile,
                 sessionName = null,
                 region = profileSection["sso_region"]
                     ?: error("Profile \"$profile\" does not have sso_session nor sso_region"),
