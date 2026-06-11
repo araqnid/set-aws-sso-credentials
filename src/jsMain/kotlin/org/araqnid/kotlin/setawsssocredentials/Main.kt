@@ -19,15 +19,21 @@ import org.araqnid.kotlin.setawsssocredentials.aws.sts.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
 import kotlin.js.Date
+import kotlin.time.toKotlinInstant
 
 @Serializable
 private data class CredentialsCacheFile(val accessToken: String)
 
 private val json = Json { ignoreUnknownKeys = true }
 
-private suspend fun loadAccessToken(): String? {
+private val ssoCacheDir = "${process.env["HOME"]}/.aws/sso/cache"
+
+private data class SSOProfileConfig(val sessionName: String?, val startUrl: String, val region: String)
+
+private suspend fun loadAccessToken(ssoProfileConfig: SSOProfileConfig): String? {
     try {
-        val credentialsCacheFile = "${process.env["HOME"]}/.aws/sso/cache/6cd2b2dcd05b0cd585381193b0b81dbf3e62d5b2.json"
+        val cacheKey = sha1(ssoProfileConfig.sessionName ?: ssoProfileConfig.startUrl)
+        val credentialsCacheFile = "$ssoCacheDir/${cacheKey}.json"
         val fileJson = json.decodeFromString<CredentialsCacheFile>(
             readFile(
                 credentialsCacheFile,
@@ -79,9 +85,10 @@ private suspend fun getRoleCredentialsPossiblyLogin(
     sso: SSO,
     accountId: String,
     roleName: String,
-    profileName: String
+    profileName: String,
+    ssoProfileConfig: SSOProfileConfig,
 ): GetRoleCredentialsCommandOutput {
-    val accessToken = loadAccessToken()
+    val accessToken = loadAccessToken(ssoProfileConfig)
     if (accessToken != null) {
         return try {
             sso.getRoleCredentials {
@@ -91,7 +98,7 @@ private suspend fun getRoleCredentialsPossiblyLogin(
             }
         } catch (_: UnauthorizedException) {
             attemptSSOLogin(profileName)
-            val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
+            val newAccessToken = loadAccessToken(ssoProfileConfig) ?: error("No access token after SSO login")
             sso.getRoleCredentials {
                 this.accountId = accountId
                 this.roleName = roleName
@@ -100,7 +107,7 @@ private suspend fun getRoleCredentialsPossiblyLogin(
         }
     }
     attemptSSOLogin(profileName)
-    val newAccessToken = loadAccessToken() ?: error("No access token after SSO login")
+    val newAccessToken = loadAccessToken(ssoProfileConfig) ?: error("No access token after SSO login")
     return sso.getRoleCredentials {
         this.accountId = accountId
         this.roleName = roleName
@@ -113,8 +120,7 @@ private suspend fun listProfiles() {
     for ((name, value) in Object.entries(sharedConfig.configFile)) {
         if (value["sso_session"] != null) {
             println(name)
-        }
-        else if (value["sso_start_url"] != null && !name.startsWith("sso-session.")) {
+        } else if (value["sso_start_url"] != null && !name.startsWith("sso-session.")) {
             println(name)
         }
     }
@@ -154,20 +160,37 @@ private suspend fun withProfileDefaultRole(
     block: suspend (region: String, roleCredentials: RoleCredentials, sts: STS) -> Unit
 ) {
     val sharedConfig = loadSharedConfigFiles().await()
-    val ssoConfig = sharedConfig.configFile[profile] ?: error($$"No such profile in $HOME/.aws/config: $$profile")
-    val region = ssoConfig["sso_region"]
-    val accountId = ssoConfig["sso_account_id"]
-    val roleName = ssoConfig["sso_role_name"]
-    if (region == null || accountId == null || roleName == null)
-        error("Profile \"$profile\" is not configured for SSO")
-    createSSO(region = region, defaultsMode = "standard").use { sso ->
-        val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile)
+    val profileSection = sharedConfig.configFile[profile] ?: error($$"No such profile in $HOME/.aws/config: $$profile")
+    val ssoSession = profileSection["sso_session"]
+    val ssoProfileConfig = run {
+        if (ssoSession != null) {
+            val sessionSection = sharedConfig.configFile["sso-session.${ssoSession}"]
+                ?: error("Profile \"$profile\" refers to unknown SSO session \"$ssoSession\"")
+            SSOProfileConfig(
+                sessionName = ssoSession,
+                region = sessionSection["sso_region"] ?: error("SSO session \"$ssoSession\" does not have sso_region"),
+                startUrl = sessionSection["sso_start_url"]
+                    ?: error("SSO session \"$ssoSession\" does not have sso_start_url"),
+            )
+        } else {
+            SSOProfileConfig(
+                sessionName = null,
+                region = profileSection["sso_region"]
+                    ?: error("Profile \"$profile\" does not have sso_session nor sso_region"),
+                startUrl = profileSection["sso_start_url"] ?: error("Profile \"$profile\" does not have sso_start_url"),
+            )
+        }
+    }
+    val accountId = profileSection["sso_account_id"] ?: error("Profile \"$profile\" does not have sso_account_id")
+    val roleName = profileSection["sso_role_name"] ?: error("Profile \"$profile\" does not have sso_role_name")
+    createSSO(region = ssoProfileConfig.region, defaultsMode = "standard").use { sso ->
+        val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile, ssoProfileConfig)
 
         response.roleCredentials?.let { roleCredentials ->
             val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
 
             createSTS(
-                region = region,
+                region = ssoProfileConfig.region,
                 defaultsMode = "standard",
                 credentialDefaultProvider = {
                     fixedCredentials(
@@ -178,7 +201,7 @@ private suspend fun withProfileDefaultRole(
                     )
                 }
             ).use { sts ->
-                block(region, roleCredentials, sts)
+                block(ssoProfileConfig.region, roleCredentials, sts)
             }
         }
     }
@@ -188,7 +211,7 @@ private suspend fun assumeProfileDefaultRole(profile: String) {
     withProfileDefaultRole(profile) { region, roleCredentials, sts ->
         val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
         val callerIdentity = sts.getCallerIdentity { }
-        printlnStderr("As ${callerIdentity.arn} until $expirationDate")
+        printlnStderr("As ${callerIdentity.arn} until ${expirationDate?.toKotlinInstant()}")
         export(roleCredentials.toExportable(region))
     }
 }
@@ -202,7 +225,7 @@ private suspend fun assumeProfileSpecifiedRole(profile: String, targetRole: Stri
             this.roleSessionName = sessionName
         }
         val secondExpirationDate = assumed.credentials!!.expiration
-        printlnStderr("As ${assumed.assumedRoleUser!!.arn} until $secondExpirationDate")
+        printlnStderr("As ${assumed.assumedRoleUser!!.arn} until ${secondExpirationDate?.toKotlinInstant()}")
         export(assumed.credentials!!.toExportable(region))
     }
 }
