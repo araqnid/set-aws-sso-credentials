@@ -186,7 +186,7 @@ private suspend fun withProfileDefaultRole(
     createSSO(region = ssoProfileConfig.region, defaultsMode = "standard").use { sso ->
         val response = getRoleCredentialsPossiblyLogin(sso, accountId, roleName, profile, ssoProfileConfig)
 
-        response.roleCredentials?.let { roleCredentials ->
+        response.roleCredentials!!.let { roleCredentials ->
             val expirationDate = roleCredentials.expiration?.let { epochMillis -> Date(epochMillis) }
 
             createSTS(
