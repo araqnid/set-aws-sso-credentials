@@ -2,6 +2,7 @@ package org.araqnid.kotlin.setawsssocredentials
 
 import js.objects.Object
 import kotlinx.coroutines.await
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import node.ErrnoException
@@ -17,7 +18,6 @@ import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
 import org.araqnid.kotlin.setawsssocredentials.aws.sts.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlin.js.Date
 
 @Serializable
@@ -44,7 +44,7 @@ private suspend fun loadAccessToken(): String? {
 }
 
 private suspend fun WritableStream.writeFully(str: String) {
-    suspendCoroutine { cont ->
+    suspendCancellableCoroutine { cont ->
         if (write(str)) {
             cont.resume(Unit)
         } else {
