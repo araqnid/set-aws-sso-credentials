@@ -44,12 +44,12 @@ private suspend fun loadAccessToken(ssoProfileConfig: SSOProfileConfig): String?
             profile = ssoProfileConfig.profileName
         })
         val tokenIdentity = try {
-            tokenProvider().await()
+            tokenProvider().await().also { tokenIdentity ->
+                printlnStderr("SSO token expires at ${tokenIdentity.expiration?.toKotlinInstant()}")
+            }
         } catch (_: TokenProviderError) {
             null
         }
-        if (tokenIdentity != null)
-            printlnStderr("SSO token expires at ${tokenIdentity.expiration?.toKotlinInstant()}")
         return tokenIdentity?.token
     }
     try {
