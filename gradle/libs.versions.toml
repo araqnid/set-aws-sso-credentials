@@ -3,7 +3,7 @@ kotlin = "2.3.20"
 serialization = "1.11.0"
 coroutines = "1.10.2"
 jswrappers = "1.0.0-pre.710"
-aws-sdk = "3.922.0"
+aws-sdk = "3.1064.0"
 
 [libraries]
 coroutines-bom = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-bom", version.ref = "coroutines" }

@@ -1,4 +1,4 @@
-@file:JsModule("@smithy/shared-ini-file-loader")
+@file:JsModule("@smithy/core/config")
 @file:Suppress("unused")
 
 package org.araqnid.kotlin.setawsssocredentials.aws

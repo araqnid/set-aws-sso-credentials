@@ -13,6 +13,7 @@ import node.fs.readFile
 import node.os.EOL
 import node.process.process
 import node.stream.WritableEvent
+import org.araqnid.kotlin.setawsssocredentials.aws.TokenProviderError
 import org.araqnid.kotlin.setawsssocredentials.aws.fixedCredentials
 import org.araqnid.kotlin.setawsssocredentials.aws.loadSharedConfigFiles
 import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
@@ -42,9 +43,14 @@ private suspend fun loadAccessToken(ssoProfileConfig: SSOProfileConfig): String?
         val tokenProvider = getSsoTokenProvider(jso {
             profile = ssoProfileConfig.profileName
         })
-        val tokenIdentity = tokenProvider().await()
-        printlnStderr("SSO token expires at ${tokenIdentity.expiration?.toKotlinInstant()}")
-        return tokenIdentity.token
+        val tokenIdentity = try {
+            tokenProvider().await()
+        } catch (_: TokenProviderError) {
+            null
+        }
+        if (tokenIdentity != null)
+            printlnStderr("SSO token expires at ${tokenIdentity.expiration?.toKotlinInstant()}")
+        return tokenIdentity?.token
     }
     try {
         val cacheKey = sha1(ssoProfileConfig.sessionName ?: ssoProfileConfig.startUrl)
