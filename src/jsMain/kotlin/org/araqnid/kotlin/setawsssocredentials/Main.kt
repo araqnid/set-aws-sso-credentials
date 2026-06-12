@@ -20,6 +20,7 @@ import org.araqnid.kotlin.setawsssocredentials.aws.sso.*
 import org.araqnid.kotlin.setawsssocredentials.aws.sts.*
 import org.araqnid.kotlin.setawsssocredentials.aws.use
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.js.Date
 import kotlin.time.toKotlinInstant
 import org.araqnid.kotlin.setawsssocredentials.aws.fromSso as getSsoTokenProvider
@@ -77,6 +78,9 @@ private suspend fun WritableStream.writeFully(str: String) {
         } else {
             once(WritableEvent.DRAIN) {
                 cont.resume(Unit)
+            }
+            once(WritableEvent.ERROR) { err: dynamic ->
+                cont.resumeWithException(err)
             }
         }
     }
