@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.3.20"
 serialization = "1.11.0"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 jswrappers = "1.0.0-pre.710"
 aws-sdk = "3.1064.0"
 
